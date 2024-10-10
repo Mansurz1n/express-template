@@ -18,11 +18,11 @@ routes.get('/', (req: Request, res: Response)=>{
 
 
 
-routes.get('/login', AccountsHandler.login);
+routes.get('/login', AccountsHandler.loginHandler);
 
 
 
-routes.get('/signUp', AccountsHandler.createAccountRoute);
+//routes.get('/signUp', AccountsHandler.createAccountRoute);
 
 
 server.use(routes);
