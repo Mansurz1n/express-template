@@ -4,7 +4,8 @@ import OracleDB from "oracledb";
 
 export namespace EventsHandler {
     export type events = {
-        nome:string;
+        titulo:string;
+        desc:string;
         data:string;
         valor:string;
         horaini:string;
@@ -12,14 +13,16 @@ export namespace EventsHandler {
     }
 
     export const CreateEvent:RequestHandler = (req:Request, res:Response) =>{
-        const pNome = req.get('nameEvent');
+        const ptitulo = req.get('nameEvent');
+        const pdesc = req.get('descri')
         const pData = req.get('data');
         const pValor = req.get('valor');
         const pHoraini = req.get('HorarioI');
         const pHorarioT = req.get('HorarioT');
-        if(pNome && pData && pValor && pHoraini && pHorarioT){
+        if(ptitulo && pdesc && pData && pValor && pHoraini && pHorarioT){
             const newEvent:events ={
-                nome:pNome,
+                titulo:ptitulo,
+                desc:pdesc,
                 data:pData,
                 valor:pValor,
                 horaini:pHoraini,
@@ -29,22 +32,21 @@ export namespace EventsHandler {
                 let conn= await OracleDB.getConnection({
                     user:process.env.USER,
                     password: process.env.SENHA,
-                    connectionString:"BD-ACD"
+                    connectString:process.env.ID
                 });
 
                 await conn.execute(
-                    	`INSERT INTO events VALUES(dbms_random.string('x',16),:nome, :data,:valor
-                         , :horarioini, :horarioterm)`,
-                         [newEvent.nome,newEvent.data, newEvent.valor, newEvent.horaini, newEvent.horaterm]
+                    	`INSERT INTO events VALUES(dbms_random.string('x',16),:titulo,:desc ,:data, :horarioini, :horarioterm,:,:valor)`,
+                        [newEvent.titulo,newEvent.desc,newEvent.data,newEvent.horaini, newEvent.horaterm, newEvent.valor]
                 
                 )
                 const result = await conn.execute(
-                    `Select * FROM accounts where 
+                    `Select token FROM accounts where 
                     nome=:nome and data = :data
                     and valor = :valor and 
                     horarioini = :horarioini
                     and horarioterm=:horarioterm`,
-                    [newEvent.nome,newEvent.data, newEvent.valor, newEvent.horaini, newEvent.horaterm]
+                    [newEvent.titulo, newEvent.data, newEvent.valor, newEvent.horaini, newEvent.horaterm]
                 )
                 await conn.close();
                 let linhas = result.rows
