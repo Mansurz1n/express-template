@@ -1,0 +1,32 @@
+SET SERVEROUTPUT ON
+begin
+    for i in 1 .. 5 loop
+    dbms_output.put_line('sring(''x'',10)='|| dbms_random.string('x',30));
+    
+    end loop;
+end;
+/
+
+
+CREATE TABLE accounts(
+    ID INTEGER NOT NULL PRIMARY KEY,
+    nome VARCHAR (50) NOT NULL,
+    email VARCHAR2 (50) NOT NULL UNIQUE ,
+    Password VARCHAR2 (16) NOT NULL,
+    birthdate varchar(20) NOT NULL,
+    carteira FLOAT 
+    );
+    
+
+CREATE SEQUENCE SEQ_accounts START WITH 1 INCREMENT BY 1;
+
+
+CREATE TABLE events(
+    token VARCHAR2 (16) NOT NULL PRIMARY KEY,
+    data_aposta VARCHAR(10),
+    inicio varchar(10),
+    fim varchar(10),
+    valoraposta float);
+    
+
+
