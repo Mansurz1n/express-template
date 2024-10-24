@@ -28,7 +28,7 @@ export namespace AccountsHandler {
         let conn=await OracleDB.getConnection({
             user: process.env.USER,
             password: process.env.SENHA,
-            connectString:"string de conexao..."
+            connectString:process.env.ID
         });
         //fazer o select para verificar se a conta exixste.
         const result = await conn.execute(
@@ -84,14 +84,14 @@ export namespace AccountsHandler {
         let conn=await OracleDB.getConnection({
             user: process.env.USER,
             password: process.env.SENHA,
-            connectString:"string de conexao..."
+            connectString:process.env.ID
         });
     
 
         await conn.execute(
             //precisa colocar o outro bagulho do id 
             // que é se faz no BD mas eu n lembro mb
-            `INSERT INTO accounts VALUES  (aqui o troco do bd,:name, :email, :password, :birthdate)`,
+            `INSERT INTO accounts VALUES  (SEQ_accounts.NEXTVAL,:name, :email, :password, :birthdate)`,
             [ua.name, ua.email, ua.password, ua.birthdate]
         )
         const result = await conn.execute(
@@ -142,7 +142,7 @@ export namespace AccountsHandler {
             res.send(`Nova conta adicionada. Código: ${ID}`);
         }else{
             res.statusCode = 400;
-            res.send("Parâmetros inválidos ou faltantes.");
+            res.send("Parâmetros inválidos");
         }
     }
 

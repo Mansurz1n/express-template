@@ -1,6 +1,11 @@
 import express from "express";
 import {Request, Response, Router} from "express";
 import { AccountsHandler } from "./accounts/accounts";
+import {EventsHandler} from "./Events/events";
+
+
+
+
 
 const port = 3000; 
 const server = express();
@@ -20,9 +25,17 @@ routes.get('/', (req: Request, res: Response)=>{
 
 routes.get('/login', AccountsHandler.loginHandler);
 
+routes.post('/newEvent', EventsHandler.CreateEvent);
+
+routes.post('/signUp', AccountsHandler.createAccountRoute);
 
 
-//routes.get('/signUp', AccountsHandler.createAccountRoute);
+
+//routes.get('')
+
+
+
+
 
 
 server.use(routes);
