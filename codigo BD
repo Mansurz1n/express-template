@@ -7,6 +7,7 @@ begin
 end;
 /
 
+CREATE SEQUENCE SEQ_accounts START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE accounts(
     ID INTEGER NOT NULL PRIMARY KEY,
@@ -14,19 +15,56 @@ CREATE TABLE accounts(
     email VARCHAR2 (50) NOT NULL UNIQUE ,
     Password VARCHAR2 (16) NOT NULL,
     birthdate varchar(20) NOT NULL,
-    carteira FLOAT 
+    carteira FLOAT,
+    funcao varchar(10),
+    check(funcao="adm" or null)
     );
     
 
-CREATE SEQUENCE SEQ_accounts START WITH 1 INCREMENT BY 1;
+
 
 
 CREATE TABLE events(
     token VARCHAR2 (16) NOT NULL PRIMARY KEY,
-    data_aposta VARCHAR(10),
-    inicio varchar(10),
-    fim varchar(10),
-    valoraposta float);
-    
+    titulo varchar2(50),
+    descr varchar2(150),
+    data_aposta date,
+    inicio time(10),
+    fim time(10),
+    valoraposta number
+);
+drop TABLE events;
+drop table accounts;
 
+g
+    
+const express = require("express")
+const app = express()
+
+let date_time = new Date();
+
+// get current date
+// adjust 0 before single digit date
+let date = ("0" + date_time.getDate()).slice(-2);
+
+// get current month
+let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+
+// get current year
+let year = date_time.getFullYear();
+
+// get current hours
+let hours = date_time.getHours();
+
+// get current minutes
+let minutes = date_time.getMinutes();
+
+// get current seconds
+let seconds = date_time.getSeconds();
+
+// prints date in YYYY-MM-DD format
+console.log(year + "-" + month + "-" + date);
+
+// prints date & time in YYYY-MM-DD HH:MM:SS format
+console.log(year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
 

@@ -23,13 +23,34 @@ routes.get('/', (req: Request, res: Response)=>{
 
 
 
+
 routes.get('/login', AccountsHandler.loginHandler);
 
 routes.post('/newEvent', EventsHandler.CreateEvent);
 
 routes.post('/signUp', AccountsHandler.createAccountRoute);
 
+routes.post('/updateEvent', EventsHandler.AvaliarEvento)
 
+routes.get('/events', (req: Request, res: Response)=>{
+    res.statusCode = 403
+    res.send('Falta de parametros')
+});
+
+
+
+
+
+
+
+
+
+
+
+
+routes.get('/events/ocoridos',EventsHandler.MostrarEventos.ocoridos);
+routes.get('/events/futuros',EventsHandler.MostrarEventos.futuros);
+routes.get('/events/nochek',EventsHandler.MostrarEventos.nochek);
 
 //routes.get('')
 

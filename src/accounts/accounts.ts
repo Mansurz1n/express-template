@@ -1,6 +1,7 @@
 import {Request, RequestHandler, Response} from "express";
 import OracleDB from "oracledb"
 
+
 require('dotenv').config()
 /*
     Nampespace que contém tudo sobre "contas de usuários"
@@ -32,7 +33,7 @@ export namespace AccountsHandler {
         });
         //fazer o select para verificar se a conta exixste.
         const result = await conn.execute(
-            `SELECT *
+            `SELECT funcao
              FROM accounts
              WHERE email = :email and password = :password`,
             [email,password]
@@ -59,8 +60,9 @@ export namespace AccountsHandler {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
         if(pEmail && pPassword){
-            const a = login(pEmail,pPassword)
-            res.send('Login encontrado')
+            let a=req.get('funcao')  
+            let b = login(pEmail,pPassword)
+            res.send('Login Efetuado com sucesso')
             
             
         }else{
@@ -135,7 +137,7 @@ export namespace AccountsHandler {
                 name: pName,
                 email: pEmail, 
                 password: pPassword,
-                birthdate: pBirthdate
+                birthdate: pBirthdate,
             }
             const ID = saveNewAccount(newAccount);
             res.statusCode = 200; 
