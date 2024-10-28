@@ -43,17 +43,10 @@ export namespace AccountsHandler {
 
         const linhas = result.rows;
         console.dir(linhas,{depth:null});
-        
-
-
         await conn.close();
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.
-        if (linhas?.length===0){
-        return undefined
-        }
-        else {
-            return linhas
+        return linhas
         }
     }
     export const loginHandler:RequestHandler = (req:Request, res:Response) => {
@@ -63,7 +56,7 @@ export namespace AccountsHandler {
             let a=req.get('funcao')  
             let b = login(pEmail,pPassword)
             res.send('Login Efetuado com sucesso')
-            
+            res.send(b)
             
         }else{
             res.send('Faltando parametros')
@@ -84,39 +77,32 @@ export namespace AccountsHandler {
 
     async function saveNewAccount(ua:UserAccount) {
         let conn=await OracleDB.getConnection({
-            user: process.env.USER,
-            password: process.env.SENHA,
-            connectString:process.env.ID
+            user: "BD130824215",
+            password: "Dgkmg10",
+            connectString: "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.12.14)(PORT=1521))(CONNECT_DATA=(SID=xe)))"
+            
+            
+
         });
     
 
         await conn.execute(
             //precisa colocar o outro bagulho do id 
             // que é se faz no BD mas eu n lembro mb
-            `INSERT INTO accounts VALUES  (SEQ_accounts.NEXTVAL,:name, :email, :password, :birthdate)`,
+            `insert into accounts VALUES(SEQ_accounts.NEXTVAL,:name, :email, :password, :birthdate, 0,NULL);`,
             [ua.name, ua.email, ua.password, ua.birthdate]
         )
         const result = await conn.execute(
-            `Select ID FROM accounts where 
-            name=:name and email = :email 
-            and password = :password and 
-            birthdate = :birthdate`,
+            `Select Id FROM accounts where nome=:name and email = :email and password = :password`,
             [ua.name, ua.email, ua.password, ua.birthdate]
         )
         await conn.close();
 
-
         let linhas = result.rows;
-        if (linhas!==undefined){
-            let a=linhas[1] ;
-            console.dir(linhas,{depth:null})
-            return a 
-
-        }
             
         console.dir(linhas,{depth:null});
         
-        return 
+        return linhas
     }
 
     /**

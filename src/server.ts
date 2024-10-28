@@ -1,8 +1,8 @@
 import express from "express";
 import {Request, Response, Router} from "express";
 import { AccountsHandler } from "./accounts/accounts";
-import {EventsHandler} from "./Events/events";
-
+import {EventsHandler} from "./events/events";
+import { WalletHandler } from "./wallet/wallet";
 
 
 
@@ -38,7 +38,7 @@ routes.get('/events', (req: Request, res: Response)=>{
 });
 
 
-
+routes.get('/DeleteEvent', EventsHandler.DeleteEvent)
 
 
 

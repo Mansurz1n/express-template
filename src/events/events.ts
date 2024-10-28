@@ -1,6 +1,6 @@
 import {Request, Response, RequestHandler} from "express";
 import OracleDB from "oracledb";
-import { AccountsHandler } from "../accounts/accounts"; 
+
 
 
 
@@ -40,7 +40,7 @@ export namespace EventsHandler {
                 });
                 
                 await conn.execute(
-                    	`INSERT INTO events VALUES(dbms_random.string('x',16),:titulo,:desc ,:data, :horarioini, :horarioterm,:valor)`,
+                    	`INSERT INTO events VALUES(SEQ_accounts.NEXTVAL,dbms_random.string('x',16),:titulo,:desc ,:data, :horarioini, :horarioterm,:valor)`,
                         [newEvent.titulo,newEvent.desc,newEvent.data,newEvent.horaini,newEvent.horaterm, valor]
                 
                 )
@@ -120,9 +120,8 @@ export namespace EventsHandler {
 
 export const AvaliarEvento:RequestHandler =(req:Request, res:Response) => 
 {
-    AccountsHandler.loginHandler;
-    const a=req.get('funcao');
-    if (a!=="adm"){
+    const funcao=req.get('funcao');
+    if (funcao!=="adm"){
         res.statusCode = 403;
         res.send('Acesso não permitido.');
     }
@@ -171,8 +170,46 @@ export const AvaliarEvento:RequestHandler =(req:Request, res:Response) =>
         
     }
 
-
-
-
-
+    export const DeleteEvent:RequestHandler = (req:Request,res:Response)=>{
+        const funcao=req.get('funcao');
+        if (!funcao){
+            res.statusCode = 403;
+            res.send('Acesso não permitido.');
+        }
+        else
+        {
+            async () => {
+                let conn= await OracleDB.getConnection({
+                user:process.env.USER,
+                password: process.env.SENHA,
+                connectString:process.env.ID
+                });   
+                const result = await conn.execute(
+                `Select * FROM events where 
+                aprova=NULL`,   
+                )
+                let linhas = result.outBinds;
+                res.send(linhas)
+    
+    
+                res.send("Selecione o id que irá aprovar");
+                const pRes =req.get('res');
+                if(pRes){
+                    const id = parseInt(pRes) 
+    
+                    await conn.execute
+                    (`Delete from events where id=:id`
+                    [id]
+                    );
+                    await conn.close();
+                    res.send("Delete feito com sucesso")
+                    res.statusCode = 200
+                    }else{
+                        await conn.close();
+                        res.send("Parametro errado")
+                        res.statusCode= 403
+                    }
+            }
+        }
+    }
 }
