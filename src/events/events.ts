@@ -122,7 +122,7 @@ export const AvaliarEvento:RequestHandler =(req:Request, res:Response) =>
 {
     AccountsHandler.loginHandler;
     const a=req.get('funcao');
-    if (a!=="adm"){
+    if (a){
         res.statusCode = 403;
         res.send('Acesso não permitido.');
     }

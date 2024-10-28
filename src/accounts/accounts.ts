@@ -59,8 +59,7 @@ export namespace AccountsHandler {
     export const loginHandler:RequestHandler = (req:Request, res:Response) => {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
-        if(pEmail && pPassword){
-            let a = res.get('login(pEmail,pPassword)')  
+        if(pEmail && pPassword){  
             let b = login(pEmail,pPassword)
             res.send('Login Efetuado com sucesso')
             

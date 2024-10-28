@@ -32,7 +32,7 @@ routes.post('/signUp', AccountsHandler.createAccountRoute);
 
 routes.post('/updateEvent', EventsHandler.AvaliarEvento)
 
-routes.delete('/delete')
+//routes.delete('/delete', EventsHandler.)
 
 
 
