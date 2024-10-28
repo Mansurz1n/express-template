@@ -43,10 +43,17 @@ export namespace AccountsHandler {
 
         const linhas = result.rows;
         console.dir(linhas,{depth:null});
+        
+
+
         await conn.close();
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.
-        return linhas
+        if (linhas?.length===0){
+        return undefined
+        }
+        else {
+            return linhas
         }
     }
     export const loginHandler:RequestHandler = (req:Request, res:Response) => {
@@ -135,3 +142,4 @@ export namespace AccountsHandler {
     }
 
 }
+

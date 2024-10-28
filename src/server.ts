@@ -38,7 +38,7 @@ routes.get('/events', (req: Request, res: Response)=>{
 });
 
 
-routes.get('/DeleteEvent', EventsHandler.DeleteEvent)
+routes.post('/DeleteEvent', EventsHandler.DeleteEvent)
 
 
 

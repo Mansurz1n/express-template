@@ -120,8 +120,9 @@ export namespace EventsHandler {
 
 export const AvaliarEvento:RequestHandler =(req:Request, res:Response) => 
 {
-    const funcao=req.get('funcao');
-    if (funcao!=="adm"){
+    AccountsHandler.loginHandler;
+    const a=req.get('funcao');
+    if (a){
         res.statusCode = 403;
         res.send('Acesso não permitido.');
     }
@@ -142,7 +143,7 @@ export const AvaliarEvento:RequestHandler =(req:Request, res:Response) =>
 
 
             res.send("Selecione o id que irá aprovar");
-            const pRes =req.get('res');
+            const pRes =res.get('res');
             if(pRes){
                 const id = parseInt(pRes) 
 

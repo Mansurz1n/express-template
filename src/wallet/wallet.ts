@@ -1,17 +1,22 @@
-import {Request, Response, RequestHandler} from "express";
-import OracleDB from "oracledb";
+import {Request, RequestHandler, Response} from "express";
+import OracleDB from "oracledb"
+import { AccountsHandler } from "../accounts/accounts";
 import { EventsHandler } from "../events/events";
 
-export namespace WalletHandler{
-    export const AddFunds:RequestHandler = (req:Request,res:Response)=>
-    {
 
-    }
-    export const withdrawFunds:RequestHandler = (req:Request,res:Response)=>
+
+export namespace WalletHandler 
+{
+
+
+    export const addfunds:RequestHandler = (req:Request, res:Response) =>
     {
-            
+        
     }
-    export const betOnEvent:RequestHandler = (req:Request,res:Response)=>
+
+
+    export const betOnEvent:RequestHandler = (req:Request, res:Response) =>
+
     {
         const pEmail = req.get('email');
         const ptitulo = req.get('nameEvent');
@@ -44,4 +49,6 @@ export namespace WalletHandler{
 
 
 
+
 }
+ 
