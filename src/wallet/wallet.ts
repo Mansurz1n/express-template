@@ -8,6 +8,6 @@ export namespace WalletHandler
 {
     export const addfunds:RequestHandler = (req:Request, res:Response) =>
     {
-        
+        const
     }
 }

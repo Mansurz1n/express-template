@@ -60,10 +60,9 @@ export namespace AccountsHandler {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
         if(pEmail && pPassword){
-            let a=req.get('funcao')  
+            let a = res.get('login(pEmail,pPassword)')  
             let b = login(pEmail,pPassword)
             res.send('Login Efetuado com sucesso')
-            
             
         }else{
             res.send('Faltando parametros')

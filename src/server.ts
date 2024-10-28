@@ -32,6 +32,11 @@ routes.post('/signUp', AccountsHandler.createAccountRoute);
 
 routes.post('/updateEvent', EventsHandler.AvaliarEvento)
 
+routes.delete('/delete')
+
+
+
+
 routes.get('/events', (req: Request, res: Response)=>{
     res.statusCode = 403
     res.send('Falta de parametros')

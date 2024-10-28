@@ -143,7 +143,7 @@ export const AvaliarEvento:RequestHandler =(req:Request, res:Response) =>
 
 
             res.send("Selecione o id que irá aprovar");
-            const pRes =req.get('res');
+            const pRes =res.get('res');
             if(pRes){
                 const id = parseInt(pRes) 
 
