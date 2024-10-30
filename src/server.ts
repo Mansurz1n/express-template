@@ -26,11 +26,11 @@ routes.get('/', (req: Request, res: Response)=>{
 
 routes.get('/login', AccountsHandler.loginHandler);
 
-routes.post('/newEvent', EventsHandler.CreateEvent);
+routes.post('/newEvent',EventsHandler.CreateEvent);
 
 routes.post('/signUp', AccountsHandler.createAccountRoute);
 
-routes.post('/updateEvent', EventsHandler.AvaliarEvento)
+routes.patch('/updateEvent', EventsHandler.AvaliarEvento)
 
 routes.get('/events', (req: Request, res: Response)=>{
     res.statusCode = 403
@@ -38,7 +38,7 @@ routes.get('/events', (req: Request, res: Response)=>{
 });
 
 
-routes.post('/DeleteEvent', EventsHandler.DeleteEvent)
+routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)
 
 
 
