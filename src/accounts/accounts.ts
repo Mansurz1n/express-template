@@ -23,7 +23,7 @@ export namespace AccountsHandler {
 
     
 
-    async function login(email:string, password:string){
+    export async function login(email:string, password:string){
         //passo a passo 
         //conectar no oracle 
         let conn=await OracleDB.getConnection({
@@ -33,27 +33,32 @@ export namespace AccountsHandler {
         });
         //fazer o select para verificar se a conta exixste.
         const result = await conn.execute(
-            `SELECT funcao
-             FROM accounts
-             WHERE email = :email and password = :password`,
-            [email,password]
-            // bind value for :id
-        );
-
-
-        const linhas = result.rows;
-        console.dir(linhas,{depth:null});
-        
-
-
+            `Select funcao FROM accounts where email = :email and password = :password`,
+            [ email, password]
+        )
+        await conn.commit();
+        const token= await conn.execute(
+            `SET SERVEROUTPUT ON
+begin
+    for i in 1 .. 5 loop
+    dbms_output.put_line('sring(''x'',10)='|| dbms_random.string('x',30));
+    
+    end loop;
+end;
+/`
+        )
         await conn.close();
+        if (result===undefined)return undefined
+        let linhas = result.rows;
+        let tk =token.rows;
+        console.dir(linhas,{depth:null});
+        console.dir(tk,{depth:null});
+        if(result.rows && result.rows.length>0){
+        const row:string = result.rows[0] as string;
+        console.dir(row);
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.
-        if (linhas?.length===0){
-        return undefined
-        }
-        else {
-            return linhas
+        return row
         }
     }
     export const loginHandler:RequestHandler = (req:Request, res:Response) => {
@@ -62,9 +67,9 @@ export namespace AccountsHandler {
         if(pEmail && pPassword){
             let a=req.get('funcao')  
             let b = login(pEmail,pPassword)
-            res.send('Login Efetuado com sucesso')
-            res.send(b)
-            
+            if (b===undefined) res.send('Conta não encontrada')
+            else if (!b === null)res.send(`Bem vindo adm!!`)            
+            else res.send(`Login Efetuado com sucesso`)
         }else{
             res.send('Faltando parametros')
         }
@@ -82,11 +87,11 @@ export namespace AccountsHandler {
 
     }*/
 
-    async function saveNewAccount(ua:UserAccount) {
+    async function saveNewAccount(ua:UserAccount,res:Response) {
         let conn=await OracleDB.getConnection({
-            user: "BD130824215",
-            password: "Dgkmg10",
-            connectString: "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=172.16.12.14)(PORT=1521))(CONNECT_DATA=(SID=xe)))"
+            user: process.env.USER,
+            password: process.env.SENHA,
+            connectString: process.env.ID
             
             
 
@@ -96,13 +101,16 @@ export namespace AccountsHandler {
         await conn.execute(
             //precisa colocar o outro bagulho do id 
             // que é se faz no BD mas eu n lembro mb
-            `insert into accounts VALUES(SEQ_accounts.NEXTVAL,:name, :email, :password, :birthdate, 0,NULL);`,
+            `insert into accounts VALUES(SEQ_accounts.NEXTVAL,:name, :email, :password, :birthdate, 0, NULL)`,
             [ua.name, ua.email, ua.password, ua.birthdate]
         )
         const result = await conn.execute(
-            `Select Id FROM accounts where nome=:name and email = :email and password = :password`,
-            [ua.name, ua.email, ua.password, ua.birthdate]
+            `Select * FROM accounts where nome=:name and email = :email and password = :password`,
+            [ua.name, ua.email, ua.password]
         )
+        await conn.commit();
+
+
         await conn.close();
 
         let linhas = result.rows;
@@ -132,7 +140,8 @@ export namespace AccountsHandler {
                 password: pPassword,
                 birthdate: pBirthdate,
             }
-            const ID = saveNewAccount(newAccount);
+            const ID = saveNewAccount(newAccount,res);
+            
             res.statusCode = 200; 
             res.send(`Nova conta adicionada. Código: ${ID}`);
         }else{

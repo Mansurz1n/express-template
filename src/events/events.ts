@@ -1,6 +1,6 @@
 import {Request, Response, RequestHandler} from "express";
 import OracleDB from "oracledb";
-
+import { AccountsHandler } from "../accounts/accounts";
 
 
 
@@ -32,7 +32,7 @@ export namespace EventsHandler {
                 horaterm:pHorarioT
             }
             let valor = parseFloat(newEvent.valor);
-            const ID  = async (newEvent:events) =>{
+            async (newEvent:events) =>{
                 let conn= await OracleDB.getConnection({
                     user:process.env.USER,
                     password: process.env.SENHA,
@@ -40,24 +40,34 @@ export namespace EventsHandler {
                 });
                 
                 await conn.execute(
-                    	`INSERT INTO events VALUES(SEQ_accounts.NEXTVAL,dbms_random.string('x',16),:titulo,:desc ,:data, :horarioini, :horarioterm,:valor)`,
+                    	`INSERT INTO events VALUES(SEQ_accounts.NEXTVAL,dbms_random.string('x',16),:titulo,:desc ,:data, :horarioini, :horarioterm,:valor,null)`,
                         [newEvent.titulo,newEvent.desc,newEvent.data,newEvent.horaini,newEvent.horaterm, valor]
                 
                 )
                 const result = await conn.execute(
-                    `Select token FROM events where 
+                    `Select * FROM events where 
                     nome=:nome and data = :data
                     and valor = :valor and 
                     horarioini = :horarioini
                     and horarioterm=:horarioterm`,
-                    [newEvent.titulo, newEvent.data, valor, newEvent.horaini+":00", newEvent.horaterm+":00"]
+                    [newEvent.titulo, newEvent.data, valor, newEvent.horaini, newEvent.horaterm]
                 )
+                await conn.commit();
                 await conn.close();
                 let linhas = result.rows
+                if(!linhas || linhas.length===0){
+                    res.send('deu ruim')
+                    res.statusCode = 400
+                }else{
                 console.dir(linhas,{depth:null});
-                return
+                res.statusCode = 200
+                res.send(`Novo evento adicionado. Codigo: ${linhas[0]}`)
+                }
 
             }
+        }else{
+            res.statusCode = 400
+            res.send("Parametros invalidos")
         }
         
     }
@@ -118,62 +128,74 @@ export namespace EventsHandler {
         }
     }
 
-export const AvaliarEvento:RequestHandler =(req:Request, res:Response) => 
-{
-    AccountsHandler.loginHandler;
-    const a=req.get('funcao');
-    if (a){
-        res.statusCode = 403;
-        res.send('Acesso não permitido.');
-    }
-    else
+    export const AvaliarEvento:RequestHandler =(req:Request, res:Response) => 
     {
-        async () => {
+    const pEmail =req.get('email');
+    const pPassword = req.get('password');
+    if(pEmail && pPassword){
+        async()=>{
+
+        const linhas= await AccountsHandler.login(pEmail, pPassword)
+        const a = linhas
+        if(linhas){
+            res.statusCode = 403;
+            res.send('Acesso não permitido.');
+        }
+        else
+        {
             let conn= await OracleDB.getConnection({
             user:process.env.USER,
             password: process.env.SENHA,
             connectString:process.env.ID
             });   
             const result = await conn.execute(
-                `Select * FROM events where 
+                `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta  FROM events where 
                 aprova=NULL`,   
             )
             let linhas = result.outBinds;
             res.send(linhas)
 
 
-            res.send("Selecione o id que irá aprovar");
+            console.log("Selecione o id que irá aprovar");
             const pRes =res.get('res');
             if(pRes){
                 const id = parseInt(pRes) 
-
                 await conn.execute
                 (`Update events set aprova='sim' where id=:id`
                 [id]
                 );
+
+
                 const result2 = await conn.execute(
                 `Select * FROM events where 
                 id=:id`
                 [id]
                 )
+                await conn.commit();
                 res.send(result2.outBinds)
                 await conn.close();
-                res.send("Update feito com sucesso")
+                
                 res.statusCode = 200
-            }else{
-                await conn.close();
-                res.send("Parametro errado")
-                res.statusCode= 403
+                }else{
+                    await conn.close();
+                    res.statusCode= 403
 
+                }
             }
-            }   
+
+            
         }
         
+    }else{
+        res.send('Faltando Parametros')
     }
+
+    }   
+
 
     export const DeleteEvent:RequestHandler = (req:Request,res:Response)=>{
         const funcao=req.get('funcao');
-        if (!funcao){
+        if (funcao===null){
             res.statusCode = 403;
             res.send('Acesso não permitido.');
         }
@@ -193,7 +215,6 @@ export const AvaliarEvento:RequestHandler =(req:Request, res:Response) =>
                 res.send(linhas)
     
     
-                res.send("Selecione o id que irá aprovar");
                 const pRes =req.get('res');
                 if(pRes){
                     const id = parseInt(pRes) 
@@ -202,6 +223,7 @@ export const AvaliarEvento:RequestHandler =(req:Request, res:Response) =>
                     (`Delete from events where id=:id`
                     [id]
                     );
+                    await conn.commit();
                     await conn.close();
                     res.send("Delete feito com sucesso")
                     res.statusCode = 200

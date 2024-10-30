@@ -27,16 +27,17 @@ Select Id FROM accounts where nome=:name and email = :email and password = :pass
 
 
 CREATE TABLE events(
-    id integer not null,
-    token VARCHAR2 (16) NOT NULL PRIMARY KEY,
-    titulo varchar2(50),
-    descr varchar2(150),
-    data_aposta date,
-    inicio time(10),
-    fim time(10),
-    valoraposta number(10),
-    aprova varchar2(10)
-);
+    Id integer not null,
+    token VARCHAR2 (16) NOT NULL,
+    titulo varchar2 (50),
+    descr varchar2 (150),
+    data_aposta DATE,
+    inicio TIMESTAMP(4),
+    fim TIMESTAMP(4),
+    valoraposta float,
+    aprova int,
+    PRIMARY KEY (token)
+    );
 drop TABLE events;
 drop table accounts;
 
