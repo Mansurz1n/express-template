@@ -12,7 +12,7 @@ export namespace WalletHandler
         const pEmail = req.get('email');
         const pAmount = req.get('amount');
 
-        if (!pEmail && !pAmount) {
+        if (!pEmail|| !pAmount) {
             res.status(400).send("Email ou valor para adicionar estão faltando.");
             return;
         }
@@ -46,7 +46,7 @@ export namespace WalletHandler
         const pHoraini = req.get('HorarioI');
         const pHorarioT = req.get('HorarioT');
 
-        if (!pEmail && !ptitulo && !pdesc && !pData && !pValor && !pHoraini && !pHorarioT) {
+        if (!pEmail || !ptitulo || !pdesc || !pData || !pValor || !pHoraini || !pHorarioT) {
             res.status(400).send("Parâmetros incompletos.");
             return;
         }
@@ -59,7 +59,7 @@ export namespace WalletHandler
                 [pEmail] 
             );
             if(balanceCheck.rows!==undefined){
-                const userBalance = balanceCheck.rows[0]?.carteira;
+                const userBalance:number = balanceCheck.rows[0] as number;
             if (!userBalance && userBalance < parseFloat(pValor)) {
                 res.status(403).send("Saldo insuficiente.");
                 await connection.close();
