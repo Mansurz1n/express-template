@@ -7,48 +7,87 @@ import { EventsHandler } from "../events/events";
 
 export namespace WalletHandler 
 {
-
-
-    export const addfunds:RequestHandler = (req:Request, res:Response) =>
-    {
-        
-    }
-
-
-    export const betOnEvent:RequestHandler = (req:Request, res:Response) =>
-
+    export const addfunds: RequestHandler = async (req: Request, res: Response) =>
     {
         const pEmail = req.get('email');
+        const pAmount = req.get('amount');
+
+        if (!pEmail && !pAmount) {
+            res.status(400).send("Email ou valor para adicionar estão faltando.");
+            return;
+        }
+
+        try {
+            const connection = await OracleDB.getConnection();
+            const result = await connection.execute(
+                `UPDATE accounts SET balance = balance + :amount WHERE email = :email`,
+                [ pEmail, parseFloat(pAmount) ]
+            );
+
+            if (result.rowsAffected === 0) {
+                res.status(404).send("Usuário não encontrado.");
+            } else {
+                res.status(200).send("Fundos adicionados com sucesso.");
+            }
+
+            await connection.close();
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("Erro ao adicionar fundos.");
+        }
+    }
+
+    export const betOnEvent: RequestHandler = async (req: Request, res: Response) => {
+        const pEmail = req.get('email');
         const ptitulo = req.get('nameEvent');
-        const pdesc = req.get('descri')
+        const pdesc = req.get('descri');
         const pData = req.get('data');
         const pValor = req.get('valor');
         const pHoraini = req.get('HorarioI');
         const pHorarioT = req.get('HorarioT');
-        if(ptitulo && pdesc && pData && pValor && pHoraini && pHorarioT){
-            const newEvent:EventsHandler.events ={
-                titulo:ptitulo,
-                desc:pdesc,
-                data:pData,
-                valor:pValor,
-                horaini:pHoraini,
-                horaterm:pHorarioT
+
+        if (!pEmail && !ptitulo && !pdesc && !pData && !pValor && !pHoraini && !pHorarioT) {
+            res.status(400).send("Parâmetros incompletos.");
+            return;
+        }
+
+        try {
+            const connection = await OracleDB.getConnection();
+
+            const balanceCheck = await connection.execute(
+                'SELECT balance FROM Users WHERE email = :email',
+                [pEmail] 
+            );
+            if(balanceCheck.rows!==undefined){
+                const userBalance = balanceCheck.rows[0]?.carteira;
+            if (!userBalance && userBalance < parseFloat(pValor)) {
+                res.status(403).send("Saldo insuficiente.");
+                await connection.close();
+                return;
             }
-        }
-        if(pEmail){
-            res.statusCode = 403;
-            res.send('Ta faltando coisa')
-        }
-        else{
-            
+
+            await connection.execute(
+                'UPDATE Users SET balance = balance - :valor WHERE email = :email',
+                { email: pEmail, valor: parseFloat(pValor) }
+            );
+
+            const newEvent: EventsHandler.events = {
+                titulo: ptitulo,
+                desc: pdesc,
+                data: pData,
+                valor: pValor,
+                horaini: pHoraini,
+                horaterm: pHorarioT
+            };
+
+            // Aqui pode-se adicionar a lógica para salvar o evento na base de dados
+            res.status(200).send("Aposta realizada com sucesso.");
+
+            await connection.close();
+        }} catch (err) {
+            console.error(err);
+            res.status(500).send("Erro ao realizar aposta.");
         }
     }
-
-
-
-
-
-
-
 }
  
