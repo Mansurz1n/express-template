@@ -33,25 +33,32 @@ export namespace AccountsHandler {
         });
         //fazer o select para verificar se a conta exixste.
         const result = await conn.execute(
-            `SELECT funcao
-             FROM accounts
-             WHERE email = :email and password = :password`,
-            [email,password]
-            // bind value for :id
-        );
+            `Select funcao FROM accounts where email = :email and password = :password`,
+            [ email, password]
+        )
+        await conn.commit();
+        const token= await conn.execute(
+            `SET SERVEROUTPUT ON
+begin
+    for i in 1 .. 5 loop
+    dbms_output.put_line('sring(''x'',10)='|| dbms_random.string('x',30));
+    
+    end loop;
+end;
+/`
+        )
+        await conn.close();
+        if (result===undefined)return undefined
+        let linhas = result.rows;
+        let tk =token.rows;
+        console.dir(linhas,{depth:null});
+        console.dir(tk,{depth:null});
         if(result.rows && result.rows.length>0){
         const row:string = result.rows[0] as string;
         console.dir(row);
-
-        await conn.close();
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.
-        if (row===null){
-        return null
-        }
-        else {
-            return row
-        }
+        return row
         }
     }
     export const loginHandler:RequestHandler = (req:Request, res:Response) => {
@@ -60,13 +67,9 @@ export namespace AccountsHandler {
         if(pEmail && pPassword){
             let a=req.get('funcao')  
             let b = login(pEmail,pPassword)
-            if (!b === null)
-            {
-                res.send(`Bem vindo adm`)
-            }
-            else{
-                res.send(`Login Efetuado com sucesso`)
-            }
+            if (b===undefined) res.send('Conta não encontrada')
+            else if (!b === null)res.send(`Bem vindo adm!!`)            
+            else res.send(`Login Efetuado com sucesso`)
         }else{
             res.send('Faltando parametros')
         }
