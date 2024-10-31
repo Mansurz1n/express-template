@@ -32,12 +32,17 @@ routes.post('/signUp', AccountsHandler.createAccountRoute);
 
 routes.patch('/updateEvent', EventsHandler.AvaliarEvento)
 
-routes.get('/events', (req: Request, res: Response)=>{
-    res.statusCode = 403
-    res.send('Falta de parametros')
-});
 
 
+
+routes.get('/addFunds',WalletHandler.addfunds);
+
+routes.get('/withdrawFunds', WalletHandler.withdrawFunds)
+
+
+routes.get('/:id/betOnEvent/', WalletHandler.betOnEvent);
+
+routes.get('/:id/finishEvent/', WalletHandler.finishEvent)
 routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)
 
 

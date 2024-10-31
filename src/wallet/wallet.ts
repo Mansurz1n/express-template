@@ -147,7 +147,7 @@ export namespace WalletHandler {
 
 
     export const finishEvent: RequestHandler = async (req: Request, res: Response) => {
-        const pEventId = req.get('eventId');
+        const pEventId = req.get('id');
         const pVerdict = req.get('verdict');
 
         if (!pEventId || !pVerdict) {
