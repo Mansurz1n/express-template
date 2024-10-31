@@ -36,39 +36,51 @@ export namespace AccountsHandler {
             `Select funcao FROM accounts where email = :email and password = :password`,
             [ email, password]
         )
+        let linhas = result.rows;
+        console.dir(linhas,{depth:null});
         await conn.commit();
-        const token= await conn.execute(
-            `SET SERVEROUTPUT ON
-begin
-    for i in 1 .. 5 loop
-    dbms_output.put_line('sring(''x'',10)='|| dbms_random.string('x',30));
-    
-    end loop;
-end;
-/`
+        
+        await conn.execute(
+        `begin
+            dbms_output.ENABLE(NULL);
+        end;`
         )
+        const token = await conn.execute(
+            `begin
+                dbms_output.put_line(dbms_random.string('x',16));
+            end;`
+        )
+
+
         await conn.close();
         if (result===undefined)return undefined
-        let linhas = result.rows;
+
+        
         let tk =token.rows;
-        console.dir(linhas,{depth:null});
+
+        
         console.dir(tk,{depth:null});
+
+
+
         if(result.rows && result.rows.length>0){
         const row:string = result.rows[0] as string;
         console.dir(row);
+        const a:string = row[0] as string
+        console.dir(a) 
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.
-        return row
+        return a
         }
     }
     export const loginHandler:RequestHandler = (req:Request, res:Response) => {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
         if(pEmail && pPassword){
-            let a=req.get('funcao')  
+            let a=req.get('funcao') 
             let b = login(pEmail,pPassword)
-            if (b===undefined) res.send('Conta não encontrada')
-            else if (!b === null)res.send(`Bem vindo adm!!`)            
+            if (b===undefined) res.send('Conta não encontrada')  
+            else if (b!==null)res.send('Bem vindo adm')        
             else res.send(`Login Efetuado com sucesso`)
         }else{
             res.send('Faltando parametros')
@@ -105,19 +117,30 @@ end;
             [ua.name, ua.email, ua.password, ua.birthdate]
         )
         const result = await conn.execute(
-            `Select * FROM accounts where nome=:name and email = :email and password = :password`,
+            `Select Id FROM accounts where nome=:name and email = :email and password = :password`,
             [ua.name, ua.email, ua.password]
         )
         await conn.commit();
 
 
+
+
+
+
+
         await conn.close();
 
-        let linhas = result.rows;
+        if(result.rows && result.rows.length>0){
+            const row:string = result.rows[0] as string;
+            console.dir(row);
+            const a:string = row[0] as string
+            console.dir(a)
             
-        console.dir(linhas,{depth:null});
+        console.dir(a,{depth:null});
         
-        return linhas
+        return a
+        }
+        return
     }
 
     /**

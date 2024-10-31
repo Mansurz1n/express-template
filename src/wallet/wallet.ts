@@ -9,18 +9,22 @@ export namespace WalletHandler {
 
     export const addfunds: RequestHandler = async (req: Request, res: Response) => {
         const pEmail = req.get('email');
-        const pAmount = req.get('amount');
+        const pValor = req.get('valor');
 
-        if (!pEmail || !pAmount) {
+        if (!pEmail || !pValor) {
             res.status(400).send("Email ou valor para adicionar estão faltando.");
             return;
         }
 
         try {
-            const connection = await OracleDB.getConnection();
-            const result = await connection.execute(
-                `UPDATE accounts SET carteira = carteira + :amount WHERE email = :email`,
-                { pEmail, amount: parseFloat(pAmount) }
+            const conn = await OracleDB.getConnection({
+                user:process.env.USER,
+                password: process.env.SENHA,
+                connectString:process.env.ID
+            });
+            const result = await conn.execute(
+                `UPDATE accounts SET carteira = carteira + :Valor WHERE email = :email`,
+                { pEmail, Valor: parseFloat(pValor) }
             );
 
             if (result.rowsAffected === 0) {
@@ -29,7 +33,7 @@ export namespace WalletHandler {
                 res.status(200).send("Fundos adicionados com sucesso.");
             }
 
-            await connection.close();
+            await conn.close();
         } catch (err) {
             console.error(err);
             res.status(500).send("Erro ao adicionar fundos.");
@@ -52,9 +56,13 @@ export namespace WalletHandler {
         }
 
         try {
-            const connection = await OracleDB.getConnection();
+            const conn = await OracleDB.getConnection({
+                user:process.env.USER,
+                password: process.env.SENHA,
+                connectString:process.env.ID
+            });
 
-            const balanceCheck = await connection.execute(
+            const balanceCheck = await conn.execute(
                 `SELECT carteira FROM accounts WHERE email = :email`,
                 { pEmail }
             );
@@ -62,17 +70,17 @@ export namespace WalletHandler {
                 const userBalance = balanceCheck.rows[0] as number;
                 if (!userBalance || userBalance < parseFloat(pValor)) {
                     res.status(403).send("Saldo insuficiente.");
-                    await connection.close();
+                    await conn.close();
                     return;
                 }
             }
 
-            await connection.execute(
+            await conn.execute(
                 `UPDATE accounts SET carteira = carteira - :valor WHERE email = :email`,
                 { pEmail, valor: parseFloat(pValor) }
             );
 
-            const newEvent = {
+            const newEvent:EventsHandler.events = {
                 titulo: pTitulo,
                 desc: pDesc,
                 data: pData,
@@ -84,7 +92,7 @@ export namespace WalletHandler {
         
             res.status(200).send("Aposta realizada com sucesso.");
             
-            await connection.close();
+            await conn.close();
         } catch (err) {
             console.error(err);
             res.status(500).send("Erro ao realizar aposta.");
@@ -94,39 +102,43 @@ export namespace WalletHandler {
    
     export const withdrawFunds: RequestHandler = async (req: Request, res: Response) => {
         const pEmail = req.get('email');
-        const pAmount = req.get('amount');
+        const pValor = req.get('Valor');
         const pAccount = req.get('account');
 
-        if (!pEmail || !pAmount || !pAccount) {
+        if (!pEmail || !pValor || !pAccount) {
             res.status(400).send("Parâmetros de saque incompletos.");
             return;
         }
 
         try {
-            const connection = await OracleDB.getConnection();
+            const conn = await OracleDB.getConnection({
+                user:process.env.USER,
+                password: process.env.SENHA,
+                connectString:process.env.ID
+            });
 
-            const balanceCheck = await connection.execute(
+            const balanceCheck = await conn.execute(
                 `SELECT carteira FROM accounts WHERE email = :email`,
-                { email: pEmail }
+                { pEmail }
             );
             if(balanceCheck.rows!==undefined){
                 const userBalance = balanceCheck.rows[0] as number;
-                if (!userBalance || userBalance < parseFloat(pAmount)) {
+                if (!userBalance || userBalance < parseFloat(pValor)) {
                     res.status(403).send("Saldo insuficiente para saque.");
-                    await connection.close();
+                    await conn.close();
                     return;
                 }
             }
 
-            await connection.execute(
-                `UPDATE accounts SET carteira = carteira - :amount WHERE email = :email`,
-                { pEmail, amount: parseFloat(pAmount) }
+            await conn.execute(
+                `UPDATE accounts SET carteira = carteira - :valor WHERE email = :email`,
+                { pEmail, valor: parseFloat(pValor) }
             );
 
            
             res.status(200).send("Saque realizado com sucesso.");
             
-            await connection.close();
+            await conn.close();
         } catch (err) {
             console.error(err);
             res.status(500).send("Erro ao realizar saque.");
@@ -144,14 +156,18 @@ export namespace WalletHandler {
         }
 
         try {
-            const connection = await OracleDB.getConnection();
+            const  conn = await OracleDB.getConnection({
+                user:process.env.USER,
+                password: process.env.SENHA,
+                connectString:process.env.ID
+            });
 
            
             
 
             res.status(200).send("Evento encerrado e fundos distribuídos.");
             
-            await connection.close();
+            await conn.close();
         } catch (err) {
             console.error(err);
             res.status(500).send("Erro ao encerrar o evento.");

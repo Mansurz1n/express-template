@@ -15,7 +15,7 @@ export namespace EventsHandler {
     }
     
 
-    export const CreateEvent:RequestHandler = (req:Request, res:Response) =>{
+    export const CreateEvent:RequestHandler = async (req:Request, res:Response) =>{
         const ptitulo = req.get('nameEvent');
         const pdesc = req.get('descri')
         const pData = req.get('data');
@@ -32,7 +32,6 @@ export namespace EventsHandler {
                 horaterm:pHorarioT
             }
             let valor = parseFloat(newEvent.valor);
-            async (newEvent:events) =>{
                 let conn= await OracleDB.getConnection({
                     user:process.env.USER,
                     password: process.env.SENHA,
@@ -64,7 +63,7 @@ export namespace EventsHandler {
                 res.send(`Novo evento adicionado. Codigo: ${linhas[0]}`)
                 }
 
-            }
+            
         }else{
             res.statusCode = 400
             res.send("Parametros invalidos")
@@ -74,9 +73,9 @@ export namespace EventsHandler {
     export namespace MostrarEventos
     {
         
-        export const ocoridos:RequestHandler = (req: Request, res: Response)=>
+        export const ocoridos:RequestHandler = async (req: Request, res: Response)=>
         {
-            async () => {
+    
                 let conn= await OracleDB.getConnection({
                     user:process.env.USER,
                     password: process.env.SENHA,
@@ -89,12 +88,12 @@ export namespace EventsHandler {
                 await conn.close();
                 let linhas = result.rows;
                 res.send(linhas)
-            }
+            
             
         }
-        export const nochek:RequestHandler = (req: Request, res: Response)=>
+        export const nochek:RequestHandler = async (req: Request, res: Response)=>
         {
-            async () => {
+            
                 let conn= await OracleDB.getConnection({
                     user:process.env.USER,
                     password: process.env.SENHA,
@@ -107,11 +106,11 @@ export namespace EventsHandler {
                 await conn.close();
                 let linhas = result.rows;
                 res.send(linhas)
-            }
+            
         }
-        export const futuros:RequestHandler = (req: Request, res: Response)=>
+        export const futuros:RequestHandler = async (req: Request, res: Response)=>
         {
-            async () => {
+            
                 let conn= await OracleDB.getConnection({
                     user:process.env.USER,
                     password: process.env.SENHA,
@@ -124,20 +123,20 @@ export namespace EventsHandler {
                 await conn.close();
                 let linhas = result.rows;
                 res.send(linhas)
-            }
+            
         }
     }
 
-    export const AvaliarEvento:RequestHandler =(req:Request, res:Response) => 
+    export const AvaliarEvento:RequestHandler = async (req:Request, res:Response) => 
     {
     const pEmail =req.get('email');
     const pPassword = req.get('password');
     if(pEmail && pPassword){
-        async()=>{
+
 
         const linhas= await AccountsHandler.login(pEmail, pPassword)
-        const a = linhas
-        if(linhas){
+
+        if(linhas===null){
             res.statusCode = 403;
             res.send('Acesso não permitido.');
         }
@@ -181,7 +180,7 @@ export namespace EventsHandler {
                     res.statusCode= 403
 
                 }
-            }
+            
 
             
         }
@@ -193,15 +192,18 @@ export namespace EventsHandler {
     }   
 
 
-    export const DeleteEvent:RequestHandler = (req:Request,res:Response)=>{
-        const funcao=req.get('funcao');
-        if (funcao===null){
+    export const DeleteEvent:RequestHandler = async (req:Request,res:Response)=>{
+        const pEmail = req.get('email')
+        const pPassword = req.get('password')
+        if(pEmail && pPassword){
+        const linhas= await AccountsHandler.login(pEmail, pPassword)
+        if (linhas===null){
             res.statusCode = 403;
             res.send('Acesso não permitido.');
         }
         else
         {
-            async () => {
+            
                 let conn= await OracleDB.getConnection({
                 user:process.env.USER,
                 password: process.env.SENHA,
