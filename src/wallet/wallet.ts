@@ -46,10 +46,9 @@ export namespace WalletHandler {
         const pTitulo = req.get('nameEvent');
         const pData = req.get('data');
         const pValor = req.get('valor');
-        const pHoraini = req.get('HorarioI');
-        const pHorarioT = req.get('HorarioT');
+        const pRes = req.get('res');
 
-        if (!pEmail || !pTitulo || !pData || !pValor || !pHoraini || !pHorarioT) {
+        if (!pEmail || !pTitulo || !pData || !pValor || !pRes ) {
             res.status(400).send("Parâmetros incompletos.");
             return;
         }
@@ -61,12 +60,13 @@ export namespace WalletHandler {
                 connectString:process.env.ID
             });
             const result = await conn.execute(
-                `Select aprova,fim from events where titulo=:pTitulo and data=:pData and pValor`
+                `Select aprova,fim,Id from events where titulo=:pTitulo and data=:pData and pValor`
             )
             if(result.rows && result.rows.length>0){
                 const row:string = result.rows[0] as string;
                 const aprova:string = row[0] as string;
                 const inicio:string = row[1] as string;
+                const id:string = row[2] as string;
                 let date = new Date();
                 if(parseFloat(aprova) !== 1 || parse (inicio,"yyyy-MM-dd",new Date)> date)
                 {
@@ -74,7 +74,7 @@ export namespace WalletHandler {
                     await conn.close();
                     return
                 }
-            }
+            
             const balanceCheck = await conn.execute(
                 `SELECT carteira FROM accounts WHERE email = :email`,
                 { pEmail }
@@ -95,12 +95,18 @@ export namespace WalletHandler {
                 `UPDATE accounts SET carteira = carteira - :valor WHERE email = :email`,
                 { pEmail, valor: parseFloat(pValor) }
             );
+            
+            await conn.execute(
+                `insert into apostas values (:Id,:valor,:email,:res)`,
+                [parseFloat(id), pValor,parseFloat(pEmail),pRes]
 
+            )
+            await conn.commit();
 
-        
             res.status(200).send("Aposta realizada com sucesso.");
             
             await conn.close();
+            }
         } catch (err) {
             console.error(err);
             res.status(500).send("Erro ao realizar aposta.");
@@ -111,9 +117,9 @@ export namespace WalletHandler {
     export const withdrawFunds: RequestHandler = async (req: Request, res: Response) => {
         const pEmail = req.get('email');
         const pValor = req.get('Valor');
-        const pAccount = req.get('account');
 
-        if (!pEmail || !pValor || !pAccount) {
+
+        if (!pEmail || !pValor) {
             res.status(400).send("Parâmetros de saque incompletos.");
             return;
         }
@@ -129,22 +135,37 @@ export namespace WalletHandler {
                 `SELECT carteira FROM accounts WHERE email = :email`,
                 { pEmail }
             );
-            if(balanceCheck.rows!==undefined){
-                const userBalance = balanceCheck.rows[0] as number;
-                if (!userBalance || userBalance < parseFloat(pValor)) {
+            if(balanceCheck.rows && balanceCheck.rows.length>0){
+                const userBalance:string = balanceCheck.rows[0] as string;
+                if (!userBalance || parseFloat(userBalance) < parseFloat(pValor)) {
                     res.status(403).send("Saldo insuficiente para saque.");
                     await conn.close();
                     return;
                 }
             }
 
+
             await conn.execute(
                 `UPDATE accounts SET carteira = carteira - :valor WHERE email = :email`,
                 { pEmail, valor: parseFloat(pValor) }
             );
 
-           
-            res.status(200).send("Saque realizado com sucesso.");
+
+            let deposito
+            if (parseFloat(pValor)<100){
+                deposito = (parseFloat(pValor)*4/100) + parseFloat(pValor);
+            }else if (parseFloat(pValor)<1000){
+                deposito = (parseFloat(pValor)*3/100) + parseFloat(pValor);
+            }else if (parseFloat(pValor)<5000){
+                deposito = (parseFloat(pValor)*2/100) + parseFloat(pValor);
+            }else if (parseFloat(pValor)<100000){
+                deposito = (parseFloat(pValor)*1/100) + parseFloat(pValor);
+            }else{
+                deposito = parseFloat(pValor);
+            }
+
+
+            res.status(200).send(`Saque realizado com sucesso. Seu saque foi de ${deposito}`);
             
             await conn.close();
         } catch (err) {
@@ -155,12 +176,18 @@ export namespace WalletHandler {
 
 
     export const finishEvent: RequestHandler = async (req: Request, res: Response) => {
-        const pEventId = req.get('id');
-        const pVerdict = req.get('verdict');
+        const id = req.get('id');
+        const pRes = req.get('res');
+        const pEmail = req.get('email');
+        const pPassword= req.get('password');
 
-        if (!pEventId || !pVerdict) {
+        if (!id || !pRes || !pEmail || !pPassword) {
             res.status(400).send("Parâmetros para encerrar o evento estão incompletos.");
             return;
+        }
+        if(await AccountsHandler.login(pEmail,pPassword)!=='adm'){
+            res.status(403).send('Acesso não permitido.')
+            return
         }
 
         try {
@@ -170,6 +197,44 @@ export namespace WalletHandler {
                 connectString:process.env.ID
             });
 
+
+            const result = await conn.execute(
+                `select count(*) from apostas where Id_aposta = :id and res = :res`,
+                [id, pRes]
+            );
+
+
+            const aprovados = await conn.execute(
+                `select email,valor from from apostas where Id_aposta = :id and res = :res `,
+                [id, pRes]
+            )
+
+
+            if(result.rows && result.rows.length>0 && aprovados.rows && aprovados.rows.length>0){
+                const row:string = result.rows[0] as string;
+                const cont:string = row[0] as string;
+
+                const app:string = aprovados.rows[0] as string;
+                const vall:string = aprovados.rows[1] as string;
+                for(let a =0;a<=parseInt(cont) ;a++){
+                    let Conta:string = app[a] 
+                    let valor:string = vall[a]
+                    await conn.execute(
+                        `UPDATE accounts
+                        SET  carteira = carteira + :valor 
+                        WHERE email = :email`,
+                        [parseFloat(valor), Conta]
+                    ) 
+                }
+
+
+            }else {
+                await conn.close();
+                res.status(200).send("Não houve vencedores") 
+                return
+            }
+
+            await conn.commit();
            
             
 

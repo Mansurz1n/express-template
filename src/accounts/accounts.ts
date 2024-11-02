@@ -55,11 +55,10 @@ export namespace AccountsHandler {
         await conn.close();
         if (result===undefined)return undefined
 
-        
-        let tk =token.rows;
+        console.dir(token,{depth:null});
 
         
-        console.dir(tk,{depth:null});
+        
 
 
 
@@ -78,7 +77,6 @@ export namespace AccountsHandler {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
         if(pEmail && pPassword){
-            let a=req.get('funcao') 
             let b = login(pEmail,pPassword)
             if (b===undefined) res.send('Conta não encontrada')  
             else if (b!==null)res.send('Bem vindo adm')        
@@ -100,13 +98,13 @@ export namespace AccountsHandler {
 
     }*/
 
-    async function saveNewAccount(ua:UserAccount,res:Response) {
+    async function saveNewAccount(ua:UserAccount) {
         let conn=await OracleDB.getConnection({
             user: process.env.USER,
             password: process.env.SENHA,
             connectString: process.env.ID
             
-            
+        
 
         });
     
@@ -164,7 +162,7 @@ export namespace AccountsHandler {
                 password: pPassword,
                 birthdate: pBirthdate,
             }
-            const ID = saveNewAccount(newAccount,res);
+            const ID = saveNewAccount(newAccount);
             
             res.statusCode = 200; 
             res.send(`Nova conta adicionada. Código: ${ID}`);
