@@ -65,8 +65,9 @@ export namespace AccountsHandler {
 
         if(result.rows && result.rows.length>0){
         const row:string = result.rows[0] as string;
-        console.dir(row);
+        
         const a:string = row[0] as string
+        console.dir(row);
         console.dir(a) 
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.

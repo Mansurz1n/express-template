@@ -2,7 +2,7 @@ import {Request, RequestHandler, Response} from "express";
 import OracleDB from "oracledb"
 import { AccountsHandler } from "../accounts/accounts";
 import { EventsHandler } from "../events/events";
-
+import { parse } from 'date-fns';
 
 
 export namespace WalletHandler {
@@ -44,13 +44,12 @@ export namespace WalletHandler {
     export const betOnEvent: RequestHandler = async (req: Request, res: Response) => {
         const pEmail = req.get('email');
         const pTitulo = req.get('nameEvent');
-        const pDesc = req.get('descri');
         const pData = req.get('data');
         const pValor = req.get('valor');
         const pHoraini = req.get('HorarioI');
         const pHorarioT = req.get('HorarioT');
 
-        if (!pEmail || !pTitulo || !pDesc || !pData || !pValor || !pHoraini || !pHorarioT) {
+        if (!pEmail || !pTitulo || !pData || !pValor || !pHoraini || !pHorarioT) {
             res.status(400).send("Parâmetros incompletos.");
             return;
         }
@@ -61,14 +60,31 @@ export namespace WalletHandler {
                 password: process.env.SENHA,
                 connectString:process.env.ID
             });
-
+            const result = await conn.execute(
+                `Select aprova,fim from events where titulo=:pTitulo and data=:pData and pValor`
+            )
+            if(result.rows && result.rows.length>0){
+                const row:string = result.rows[0] as string;
+                const aprova:string = row[0] as string;
+                const inicio:string = row[1] as string;
+                let date = new Date();
+                if(parseFloat(aprova) !== 1 || parse (inicio,"yyyy-MM-dd",new Date)> date)
+                {
+                    res.sendStatus(403).send("Evento já terminado ou não aprovado");
+                    await conn.close();
+                    return
+                }
+            }
             const balanceCheck = await conn.execute(
                 `SELECT carteira FROM accounts WHERE email = :email`,
                 { pEmail }
             );
-            if(balanceCheck.rows!==undefined){
-                const userBalance = balanceCheck.rows[0] as number;
-                if (!userBalance || userBalance < parseFloat(pValor)) {
+            if(balanceCheck.rows && balanceCheck.rows.length>0){
+                const row:string = balanceCheck.rows[0] as string;
+                
+                const b:string = row[0] as string;
+
+                if (!b || parseFloat(b) < parseFloat(pValor)) {
                     res.status(403).send("Saldo insuficiente.");
                     await conn.close();
                     return;
@@ -80,14 +96,6 @@ export namespace WalletHandler {
                 { pEmail, valor: parseFloat(pValor) }
             );
 
-            const newEvent:EventsHandler.events = {
-                titulo: pTitulo,
-                desc: pDesc,
-                data: pData,
-                valor: pValor,
-                horaini: pHoraini,
-                horaterm: pHorarioT
-            };
 
         
             res.status(200).send("Aposta realizada com sucesso.");

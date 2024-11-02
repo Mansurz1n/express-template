@@ -39,17 +39,16 @@ export namespace EventsHandler {
                 });
                 
                 await conn.execute(
-                    	`INSERT INTO events VALUES(SEQ_accounts.NEXTVAL,dbms_random.string('x',16),:titulo,:desc ,:data, :horarioini, :horarioterm,:valor,null)`,
-                        [newEvent.titulo,newEvent.desc,newEvent.data,newEvent.horaini,newEvent.horaterm, valor]
+                    	`INSERT INTO events VALUES(SEQ_events.NEXTVAL,:titulo,:desc ,TO_DATE(:data), :horarioini, :horarioterm,:valor,null)`,
+                        [newEvent.titulo,newEvent.desc,newEvent.data,newEvent.data + " "+ newEvent.horaini,newEvent.data + " "+ newEvent.horaterm, valor]
                 
                 )
                 const result = await conn.execute(
-                    `Select * FROM events where 
-                    nome=:nome and data = :data
-                    and valor = :valor and 
-                    horarioini = :horarioini
-                    and horarioterm=:horarioterm`,
-                    [newEvent.titulo, newEvent.data, valor, newEvent.horaini, newEvent.horaterm]
+                    `Select Id FROM events where 
+                    titulo=:nome and data = :data
+                    and valor = :valor 
+                    `,
+                    [newEvent.titulo, newEvent.data, valor]
                 )
                 await conn.commit();
                 await conn.close();
