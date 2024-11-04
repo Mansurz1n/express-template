@@ -1,7 +1,6 @@
 import {Request, RequestHandler, Response} from "express";
 import OracleDB from "oracledb"
 import { AccountsHandler } from "../accounts/accounts";
-import { EventsHandler } from "../events/events";
 import { parse } from 'date-fns';
 
 
@@ -198,11 +197,14 @@ export namespace WalletHandler {
             });
 
 
-            const result = await conn.execute(
+            const ganhadores = await conn.execute(
                 `select count(*) from apostas where Id_aposta = :id and res = :res`,
                 [id, pRes]
             );
-
+            const total = await conn.execute(
+                `select count(*) from apostas where Id_aposta = :id `,
+                [id]
+            );
 
             const aprovados = await conn.execute(
                 `select email,valor from from apostas where Id_aposta = :id and res = :res `,
@@ -210,20 +212,27 @@ export namespace WalletHandler {
             )
 
 
-            if(result.rows && result.rows.length>0 && aprovados.rows && aprovados.rows.length>0){
-                const row:string = result.rows[0] as string;
+            if(ganhadores.rows && ganhadores.rows.length>0 && aprovados.rows && aprovados.rows.length>0 && total.rows && total.rows.length>0){
+                const row:string = ganhadores.rows[0] as string;
                 const cont:string = row[0] as string;
+
+                //calculo do ganho valor*perdedores/total
+                let vtotal:string = total.rows[0] as string; 
+                vtotal=vtotal[0]
+                const calc = (parseInt(cont)-parseInt(vtotal))/parseInt(vtotal)
 
                 const app:string = aprovados.rows[0] as string;
                 const vall:string = aprovados.rows[1] as string;
                 for(let a =0;a<=parseInt(cont) ;a++){
                     let Conta:string = app[a] 
-                    let valor:string = vall[a]
+                    let valorS:string = vall[a]
+                    let valor = parseFloat(valorS)
+                    valor = valor + (valor*calc) 
                     await conn.execute(
                         `UPDATE accounts
                         SET  carteira = carteira + :valor 
                         WHERE email = :email`,
-                        [parseFloat(valor), Conta]
+                        [valor, Conta]
                     ) 
                 }
 

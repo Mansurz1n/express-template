@@ -130,6 +130,7 @@ export namespace EventsHandler {
     {
     const pEmail =req.get('email');
     const pPassword = req.get('password');
+    const pRes =res.get('res');
     if(pEmail && pPassword){
 
 
@@ -146,20 +147,23 @@ export namespace EventsHandler {
             password: process.env.SENHA,
             connectString:process.env.ID
             });   
+            if(!pRes){
             const result = await conn.execute(
                 `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta  FROM events where 
                 aprova=NULL`,   
             )
-            let linhas = result.outBinds;
-            res.send(linhas)
+            let linhas = result.rows;
+            res.json(linhas)
 
 
             console.log("Selecione o id que irá aprovar");
-            const pRes =res.get('res');
-            if(pRes){
+            await conn.close()
+            }else{
                 const id = parseInt(pRes) 
+
                 await conn.execute
-                (`Update events set aprova='sim' where id=:id`
+                (`
+                    Update events set aprova='sim' where id=:id`,
                 [id]
                 );
 
@@ -174,16 +178,11 @@ export namespace EventsHandler {
                 await conn.close();
                 
                 res.statusCode = 200
-                }else{
-                    await conn.close();
-                    res.statusCode= 403
-
                 }
             
 
             
         }
-        
     }else{
         res.send('Faltando Parametros')
     }
@@ -202,25 +201,25 @@ export namespace EventsHandler {
         }
         else
         {
-            
+            const pRes =req.get('res');
                 let conn= await OracleDB.getConnection({
                 user:process.env.USER,
                 password: process.env.SENHA,
                 connectString:process.env.ID
                 });   
+            if(!pRes){
                 const result = await conn.execute(
                 `Select * FROM events where 
                 aprova=NULL`,   
                 )
-                let linhas = result.outBinds;
-                res.send(linhas)
+                let linhas = result.rows;
+                res.json(linhas)
+            }
+            else{
+ 
+                const id = parseInt(pRes) 
     
-    
-                const pRes =req.get('res');
-                if(pRes){
-                    const id = parseInt(pRes) 
-    
-                    await conn.execute
+                await conn.execute
                     (`Delete from events where id=:id`
                     [id]
                     );
@@ -228,10 +227,6 @@ export namespace EventsHandler {
                     await conn.close();
                     res.send("Delete feito com sucesso")
                     res.statusCode = 200
-                    }else{
-                        await conn.close();
-                        res.send("Parametro errado")
-                        res.statusCode= 403
                     }
             }
         }

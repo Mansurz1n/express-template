@@ -55,7 +55,7 @@ export namespace AccountsHandler {
         await conn.close();
         if (result===undefined)return undefined
 
-        console.dir(token,{depth:null});
+        console.dir(token);
 
         
         
@@ -73,13 +73,13 @@ export namespace AccountsHandler {
         return a
         }
     }
-    export const loginHandler:RequestHandler = (req:Request, res:Response) => {
+    export const loginHandler:RequestHandler = async (req:Request, res:Response) => {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
         if(pEmail && pPassword){
             let b = login(pEmail,pPassword)
             if (b===undefined) res.send('Conta não encontrada')  
-            else if (b!==null)res.send('Bem vindo adm')        
+            else if (await b==='adm')res.send('Bem vindo adm')        
             else res.send(`Login Efetuado com sucesso`)
         }else{
             res.send('Faltando parametros')
@@ -165,7 +165,7 @@ export namespace AccountsHandler {
             const ID = saveNewAccount(newAccount);
             
             res.statusCode = 200; 
-            res.send(`Nova conta adicionada. Código: ${ID}`);
+            res.send(`Nova conta adicionada.`);
         }else{
             res.statusCode = 400;
             res.send("Parâmetros inválidos");
