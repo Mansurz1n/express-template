@@ -10,65 +10,66 @@ export namespace EventsHandler {
         desc:string;
         data:string;
         valor:string;
-        horaini:string;
-        horaterm:string;
+        horaini:Date;
+        horaterm:Date;
     }
     
 
-    export const CreateEvent:RequestHandler = async (req:Request, res:Response) =>{
-        const ptitulo = req.get('nameEvent');
-        const pdesc = req.get('descri')
-        const pData = req.get('data');
-        const pValor = req.get('valor');
-        const pHoraini = req.get('HorarioI');
-        const pHorarioT = req.get('HorarioT');
-        if(ptitulo && pdesc && pData && pValor && pHoraini && pHorarioT){
-            const newEvent:events ={
-                titulo:ptitulo,
-                desc:pdesc,
-                data:pData,
-                valor:pValor,
-                horaini:pHoraini,
-                horaterm:pHorarioT
+    export const CreateEvent: RequestHandler = async (req: Request, res: Response) => {
+        try {
+            const ptitulo = req.get('nameEvent');
+            const pdesc = req.get('descri');
+            const pData = req.get('data');
+            const pValor = req.get('valor');
+            const pHoraini = req.get('HorarioI');
+            const pHorarioT = req.get('HorarioT');
+    
+            if (!ptitulo || !pdesc || !pData || !pValor || !pHoraini || !pHorarioT) {
+                res.status(400).send("Parametros invalidos");
+                return;
             }
-            let valor = parseFloat(newEvent.valor);
-                let conn= await OracleDB.getConnection({
-                    user:process.env.USER,
-                    password: process.env.SENHA,
-                    connectString:process.env.ID
-                });
-                
-                await conn.execute(
-                    	`INSERT INTO events VALUES(SEQ_events.NEXTVAL,:titulo,:desc ,TO_DATE(:data), :horarioini, :horarioterm,:valor,null)`,
-                        [newEvent.titulo,newEvent.desc,newEvent.data,newEvent.data + " "+ newEvent.horaini,newEvent.data + " "+ newEvent.horaterm, valor]
-                
-                )
-                const result = await conn.execute(
-                    `Select Id FROM events where 
-                    titulo=:nome and data = :data
-                    and valor = :valor 
-                    `,
-                    [newEvent.titulo, newEvent.data, valor]
-                )
-                await conn.commit();
-                await conn.close();
-                let linhas = result.rows
-                if(!linhas || linhas.length===0){
-                    res.send('deu ruim')
-                    res.statusCode = 400
-                }else{
-                console.dir(linhas,{depth:null});
-                res.statusCode = 200
-                res.send(`Novo evento adicionado. Codigo: ${linhas[0]}`)
+    
+            const newEvent: events = {
+                titulo: ptitulo,
+                desc: pdesc,
+                data: pData,
+                valor: pValor,
+                horaini: new Date(`1970-01-01T${pHoraini}:00Z`), // Cria um timestamp com hora de início
+                horaterm: new Date(`1970-01-01T${pHorarioT}:00Z`) // Cria um timestamp com hora de término
+            };
+    
+            const valor = parseFloat(newEvent.valor);
+            const conn = await OracleDB.getConnection({
+                user: process.env.USER,
+                password: process.env.SENHA,
+                connectString: process.env.ID
+            });
+    
+            await conn.execute(
+                `INSERT INTO events 
+                 VALUES (SEQ_events.NEXTVAL, :titulo, :desc, TO_DATE(:data, 'YYYY-MM-DD'), 
+                         :horaini, 
+                         :horaterm, 
+                         :valor, null)`,
+                {
+                    titulo: newEvent.titulo,
+                    desc: newEvent.desc,
+                    data: newEvent.data,
+                    horaini: newEvent.horaini,   // Timestamp direto
+                    horaterm: newEvent.horaterm,  // Timestamp direto
+                    valor: valor
                 }
-
-            
-        }else{
-            res.statusCode = 400
-            res.send("Parametros invalidos")
+            );
+    
+            await conn.commit();
+            await conn.close();
+    
+            res.status(200).send("Novo evento adicionado com sucesso.");
+        } catch (error) {
+            console.error("Erro ao criar evento:", error);
+            res.status(500).send("Erro ao criar evento.");
         }
-        
-    }
+    };
     export namespace MostrarEventos
     {
         
