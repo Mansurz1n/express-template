@@ -10,8 +10,8 @@ export namespace EventsHandler {
         desc:string;
         data:string;
         valor:string;
-        horaini:Date;
-        horaterm:Date;
+        horaini:string;
+        horaterm:string;
     }
     
 
@@ -34,8 +34,8 @@ export namespace EventsHandler {
                 desc: pdesc,
                 data: pData,
                 valor: pValor,
-                horaini: new Date(`1970-01-01T${pHoraini}:00Z`), // Cria um timestamp com hora de início
-                horaterm: new Date(`1970-01-01T${pHorarioT}:00Z`) // Cria um timestamp com hora de término
+                horaini: pData+' '+pHoraini + ':00.0000',
+                horaterm: pData + ' ' + pHorarioT + ':00.0000'
             };
     
             const valor = parseFloat(newEvent.valor);
@@ -48,15 +48,15 @@ export namespace EventsHandler {
             await conn.execute(
                 `INSERT INTO events 
                  VALUES (SEQ_events.NEXTVAL, :titulo, :desc, TO_DATE(:data, 'YYYY-MM-DD'), 
-                         :horaini, 
-                         :horaterm, 
-                         :valor, null)`,
+                        TO_TIMESTAMP(:horaini,'RRRR-MM-DD HH24:MI'), 
+                        TO_TIMESTAMP(:horaterm,'RRRR-MM-DD HH24:MI') 
+                        :valor, null)`,
                 {
                     titulo: newEvent.titulo,
                     desc: newEvent.desc,
                     data: newEvent.data,
-                    horaini: newEvent.horaini,   // Timestamp direto
-                    horaterm: newEvent.horaterm,  // Timestamp direto
+                    horaini: newEvent.horaini,  
+                    horaterm:  newEvent.horaterm,  
                     valor: valor
                 }
             );
