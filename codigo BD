@@ -28,12 +28,11 @@ Select Id FROM accounts where nome=:name and email = :email and password = :pass
 
 CREATE TABLE events(
     Id integer not null,
-    token VARCHAR2 (16) NOT NULL,
     titulo varchar2 (50),
     descr varchar2 (150),
-    data_aposta DATE,
-    inicio TIMESTAMP(4),
-    fim TIMESTAMP(4),
+    data_aposta VARCHAR2(10),
+    inicio VARCHAR2(10),
+    fim VARCHAR2(10),
     valoraposta float,
     aprova int,
     PRIMARY KEY (token)
@@ -42,10 +41,22 @@ drop TABLE events;
 drop table accounts;
 
 
-Select * FROM events where data<=CONVERT(date,GETUTCDATE())or
-(data<=CONVERT(date,GETUTCDATE()) and fim<CONVERT(time,GETUTCDATE()));
+CREATE table aposta(
+    Id_aposta int,
+    email varchar2(10),
+    valor   float,
+    res varchar2(10),
+    foreign key (email) references accounts(email),
+    foreign key (Id_aposta) references events(Id)
+)
 
-g
+
+
+
+
+
+
+
     
 const express = require("express")
 const app = express()

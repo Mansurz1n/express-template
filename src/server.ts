@@ -1,7 +1,7 @@
 import express from "express";
 import {Request, Response, Router} from "express";
 import { AccountsHandler } from "./accounts/accounts";
-import {EventsHandler} from "./events/events";
+import {EventsHandler} from "./Events/events";
 import { WalletHandler } from "./wallet/wallet";
 
 
@@ -35,9 +35,9 @@ routes.patch('/updateEvent', EventsHandler.AvaliarEvento)
 
 
 
-routes.get('/addFunds',WalletHandler.addfunds);
+routes.patch('/addFunds',WalletHandler.addfunds);
 
-routes.get('/withdrawFunds', WalletHandler.withdrawFunds)
+routes.patch('/withdrawFunds', WalletHandler.withdrawFunds)
 
 
 routes.get('/:id/betOnEvent/', WalletHandler.betOnEvent);

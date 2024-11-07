@@ -23,53 +23,56 @@ export namespace EventsHandler {
             const pValor = req.get('valor');
             const pHoraini = req.get('HorarioI');
             const pHorarioT = req.get('HorarioT');
-    
+
             if (!ptitulo || !pdesc || !pData || !pValor || !pHoraini || !pHorarioT) {
-                res.status(400).send("Parametros invalidos");
+                res.status(400).send("Parâmetros inválidos");
                 return;
             }
-    
+
             const newEvent: events = {
                 titulo: ptitulo,
                 desc: pdesc,
                 data: pData,
                 valor: pValor,
-                horaini: pData+' '+pHoraini + ':00.0000',
-                horaterm: pData + ' ' + pHorarioT + ':00.0000'
+                horaini: `${pData} ${pHoraini}`,
+                horaterm: `${pData} ${pHorarioT}`
             };
-    
-            const valor = parseFloat(newEvent.valor);
+
+            console.dir(process.env.USER);
+            console.dir(process.env.SENHA);
+            console.dir(process.env.ID);
+
             const conn = await OracleDB.getConnection({
                 user: process.env.USER,
                 password: process.env.SENHA,
                 connectString: process.env.ID
             });
-    
+
+            console.dir('Conectou');
             await conn.execute(
+
                 `INSERT INTO events 
-                 VALUES (SEQ_events.NEXTVAL, :titulo, :desc, TO_DATE(:data, 'YYYY-MM-DD'), 
-                        TO_TIMESTAMP(:horaini,'RRRR-MM-DD HH24:MI'), 
-                        TO_TIMESTAMP(:horaterm,'RRRR-MM-DD HH24:MI') 
-                        :valor, null)`,
-                {
-                    titulo: newEvent.titulo,
-                    desc: newEvent.desc,
-                    data: newEvent.data,
-                    horaini: newEvent.horaini,  
-                    horaterm:  newEvent.horaterm,  
-                    valor: valor
-                }
+                 VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data, :horaini, :horaterm, :valor, NULL)`,
+                [
+                    newEvent.titulo,
+                    newEvent.desc,
+                    newEvent.data,
+                    newEvent.horaini,
+                    newEvent.horaterm,
+                    newEvent.valor
+                ]
             );
-    
+
             await conn.commit();
             await conn.close();
-    
+
             res.status(200).send("Novo evento adicionado com sucesso.");
         } catch (error) {
             console.error("Erro ao criar evento:", error);
             res.status(500).send("Erro ao criar evento.");
         }
     };
+
     export namespace MostrarEventos
     {
         
@@ -86,8 +89,8 @@ export namespace EventsHandler {
                     (data=CONVERT(date,GETUTCDATE()) and fim<CONVERT(time,GETUTCDATE()));`,   
                 )
                 await conn.close();
-                let linhas = result.rows;
-                res.send(linhas)
+                
+                res.json(result.rows)
             
             
         }
@@ -104,8 +107,7 @@ export namespace EventsHandler {
                     aprova=NULL`,   
                 )
                 await conn.close();
-                let linhas = result.rows;
-                res.send(linhas)
+                res.json(result.rows)
             
         }
         export const futuros:RequestHandler = async (req: Request, res: Response)=>
@@ -121,8 +123,7 @@ export namespace EventsHandler {
                     (data=CONVERT(date,GETUTCDATE()) and fim>CONVERT(time,GETUTCDATE()));`,   
                 )
                 await conn.close();
-                let linhas = result.rows;
-                res.send(linhas)
+                res.json(result.rows)
             
         }
     }
@@ -163,15 +164,15 @@ export namespace EventsHandler {
                 const id = parseInt(pRes) 
 
                 await conn.execute
-                (`
-                    Update events set aprova='sim' where id=:id`,
+                (
+                    `Update events set aprova='sim' where id=:id`,
                 [id]
                 );
 
 
                 const result2 = await conn.execute(
                 `Select * FROM events where 
-                id=:id`
+                id=:id`,
                 [id]
                 )
                 await conn.commit();
@@ -221,7 +222,7 @@ export namespace EventsHandler {
                 const id = parseInt(pRes) 
     
                 await conn.execute
-                    (`Delete from events where id=:id`
+                    (`Delete from events where id=:id`,
                     [id]
                     );
                     await conn.commit();

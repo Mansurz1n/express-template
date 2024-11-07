@@ -23,7 +23,7 @@ export namespace WalletHandler {
             });
             const result = await conn.execute(
                 `UPDATE accounts SET carteira = carteira + :Valor WHERE email = :email`,
-                { pEmail, Valor: parseFloat(pValor) }
+                {email:pEmail, Valor: parseFloat(pValor) }
             );
 
             if (result.rowsAffected === 0) {
@@ -115,7 +115,7 @@ export namespace WalletHandler {
    
     export const withdrawFunds: RequestHandler = async (req: Request, res: Response) => {
         const pEmail = req.get('email');
-        const pValor = req.get('Valor');
+        const pValor = req.get('valor');
 
 
         if (!pEmail || !pValor) {
@@ -132,7 +132,7 @@ export namespace WalletHandler {
 
             const balanceCheck = await conn.execute(
                 `SELECT carteira FROM accounts WHERE email = :email`,
-                { pEmail }
+                { email:pEmail }
             );
             if(balanceCheck.rows && balanceCheck.rows.length>0){
                 const userBalance:string = balanceCheck.rows[0] as string;
@@ -146,7 +146,7 @@ export namespace WalletHandler {
 
             await conn.execute(
                 `UPDATE accounts SET carteira = carteira - :valor WHERE email = :email`,
-                { pEmail, valor: parseFloat(pValor) }
+                {email:pEmail, valor: parseFloat(pValor) }
             );
 
 
