@@ -22,8 +22,8 @@ export namespace WalletHandler {
                 connectString:process.env.ID
             });
             const result = await conn.execute(
-                `UPDATE accounts SET carteira = carteira + :Valor WHERE email = :email`,
-                {email:pEmail, Valor: parseFloat(pValor) }
+                `UPDATE accounts SET carteira = carteira + :carteira WHERE email = :email`,
+                {email:pEmail, carteira: parseFloat(pValor) }
             );
 
             if (result.rowsAffected === 0) {
@@ -59,7 +59,8 @@ export namespace WalletHandler {
                 connectString:process.env.ID
             });
             const result = await conn.execute(
-                `Select aprova,fim,Id from events where titulo=:pTitulo and data=:pData and pValor`
+                `Select aprova,fim,Id from events where titulo=:titulo and data_aposta=:data_aposta`,
+                [pTitulo,pData,pValor]
             )
             if(result.rows && result.rows.length>0){
                 const row:string = result.rows[0] as string;
@@ -91,12 +92,12 @@ export namespace WalletHandler {
             }
 
             await conn.execute(
-                `UPDATE accounts SET carteira = carteira - :valor WHERE email = :email`,
-                { pEmail, valor: parseFloat(pValor) }
+                `UPDATE accounts SET carteira = carteira - :carteira WHERE email = :email`,
+                { email:pEmail, carteira: parseFloat(pValor) }
             );
             
             await conn.execute(
-                `insert into apostas values (:Id,:valor,:email,:res)`,
+                `insert into apostas values (:Id_aposta,:valor,:email,:res)`,
                 [parseFloat(id), pValor,parseFloat(pEmail),pRes]
 
             )
@@ -145,8 +146,8 @@ export namespace WalletHandler {
 
 
             await conn.execute(
-                `UPDATE accounts SET carteira = carteira - :valor WHERE email = :email`,
-                {email:pEmail, valor: parseFloat(pValor) }
+                `UPDATE accounts SET carteira = carteira - :carteira WHERE email = :email`,
+                [parseFloat(pValor), pEmail] 
             );
 
 
@@ -198,16 +199,16 @@ export namespace WalletHandler {
 
 
             const ganhadores = await conn.execute(
-                `select count(*) from apostas where Id_aposta = :id and res = :res`,
+                `select count(*) from apostas where Id_aposta = :id_aposta and res = :res`,
                 [id, pRes]
             );
             const total = await conn.execute(
-                `select count(*) from apostas where Id_aposta = :id `,
+                `select count(*) from apostas where Id_aposta = :id_aposta `,
                 [id]
             );
 
             const aprovados = await conn.execute(
-                `select email,valor from from apostas where Id_aposta = :id and res = :res `,
+                `select email,valor from from apostas where Id_aposta = :id_aposta and res = :res `,
                 [id, pRes]
             )
 

@@ -176,7 +176,7 @@ export namespace EventsHandler {
                 [id]
                 )
                 await conn.commit();
-                res.send(result2.outBinds)
+                res.json(result2.outBinds)
                 await conn.close();
                 
                 res.statusCode = 200
