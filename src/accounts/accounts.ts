@@ -78,9 +78,9 @@ export namespace AccountsHandler {
         const pPassword = req.get('password');
         if(pEmail && pPassword){
             let b = login(pEmail,pPassword)
-            if (b===undefined) res.send('Conta não encontrada')  
+            if (await b==='n') res.send(`Login Efetuado com sucesso`)
             else if (await b==='adm')res.send('Bem vindo adm')        
-            else res.send(`Login Efetuado com sucesso`)
+            else res.send('Conta não encontrada')
         }else{
             res.send('Faltando parametros')
         }
@@ -112,7 +112,7 @@ export namespace AccountsHandler {
         await conn.execute(
             //precisa colocar o outro bagulho do id 
             // que é se faz no BD mas eu n lembro mb
-            `insert into accounts VALUES(SEQ_accounts.NEXTVAL,:name, :email, :password, :birthdate, 0, NULL)`,
+            `insert into accounts VALUES(SEQ_accounts.NEXTVAL,:name, :email, :password, :birthdate, 0, 'n')`,
             [ua.name, ua.email, ua.password, ua.birthdate]
         )
         const result = await conn.execute(
