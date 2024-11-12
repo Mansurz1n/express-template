@@ -52,7 +52,7 @@ export namespace EventsHandler {
             await conn.execute(
 
                 `INSERT INTO events 
-                 VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data, :horaini, :horaterm, :valor, NULL)`,
+                 VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data, :horaini, :horaterm, :valor, 'pen')`,
                 [
                     newEvent.titulo,
                     newEvent.desc,
@@ -132,7 +132,8 @@ export namespace EventsHandler {
     {
     const pEmail =req.get('email');
     const pPassword = req.get('password');
-    const pRes =res.get('res');
+    const pId =res.get('id');
+    const pRes = res.get('res');
     if(pEmail && pPassword){
 
 
@@ -149,7 +150,7 @@ export namespace EventsHandler {
             password: process.env.SENHA,
             connectString:process.env.ID
             });   
-            if(!pRes){
+            if(!pId || !pRes){
             const result = await conn.execute(
                 `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta  FROM events where 
                 aprova=NULL`,   
@@ -161,12 +162,13 @@ export namespace EventsHandler {
             console.log("Selecione o id que irá aprovar");
             await conn.close()
             }else{
-                const id = parseInt(pRes) 
-
+                
+                const id = parseInt(pId) 
+                if(pRes==='sim' || pRes === 'nao'){
                 await conn.execute
                 (
-                    `Update events set aprova='sim' where id=:id`,
-                [id]
+                    `Update events set aprova=:aprova where id=:id`,
+                [pRes,id]
                 );
 
 
@@ -175,12 +177,17 @@ export namespace EventsHandler {
                 id=:id`,
                 [id]
                 )
+                
                 await conn.commit();
                 res.json(result2.outBinds)
                 await conn.close();
                 
                 res.statusCode = 200
+                }else{
+                    res.send('Resposta errada. Por favor digitar sim ou nao')
+                    res.statusCode = 400
                 }
+            }
             
 
             
@@ -195,42 +202,31 @@ export namespace EventsHandler {
     export const DeleteEvent:RequestHandler = async (req:Request,res:Response)=>{
         const pEmail = req.get('email')
         const pPassword = req.get('password')
-        if(pEmail && pPassword){
+        const pId = req.get('id')
+        if(pEmail && pPassword && pId){
         const linhas= await AccountsHandler.login(pEmail, pPassword)
         if (linhas===null){
             res.statusCode = 403;
             res.send('Acesso não permitido.');
         }
         else
-        {
-            const pRes =req.get('res');
-                let conn= await OracleDB.getConnection({
-                user:process.env.USER,
-                password: process.env.SENHA,
-                connectString:process.env.ID
-                });   
-            if(!pRes){
-                const result = await conn.execute(
-                `Select * FROM events where 
-                aprova=NULL`,   
-                )
-                let linhas = result.rows;
-                res.json(linhas)
-            }
-            else{
- 
-                const id = parseInt(pRes) 
-    
-                await conn.execute
-                    (`Delete from events where id=:id`,
-                    [id]
-                    );
-                    await conn.commit();
-                    await conn.close();
-                    res.send("Delete feito com sucesso")
-                    res.statusCode = 200
-                    }
-            }
+        {       
+            const id = parseInt(pId)
+            let conn= await OracleDB.getConnection({
+            user:process.env.USER,
+            password: process.env.SENHA,
+            connectString:process.env.ID
+            });  
+            await conn.execute
+                (`Delete from events where id=:id`,
+                [id]
+                );
+                await conn.commit();
+                await conn.close();
+                res.send("Delete feito com sucesso")
+                res.statusCode = 200
+        }
+            
         }
     }
 }
