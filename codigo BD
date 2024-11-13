@@ -30,11 +30,11 @@ CREATE TABLE events(
     Id integer not null,
     titulo varchar2 (50),
     descr varchar2 (150),
-    data_aposta VARCHAR2(10),
-    inicio VARCHAR2(10),
-    fim VARCHAR2(10),
+    data_aposta DATE,
+    inicio TIMESTAMP WITH LOCAL ZONE(6),
+    fim TIMESTAMP WITH LOCAL ZONE(6),
     valoraposta float,
-    aprova int,
+    aprova varchar2(4),
     PRIMARY KEY (token)
     );
 drop TABLE events;
@@ -58,7 +58,7 @@ create or REPLACE FUNCTION calc_acerto
     begin 
         return(valor+carteira);
     end calc_acerto;
-    
+
 
 
 
