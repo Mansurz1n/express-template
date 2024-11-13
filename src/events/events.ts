@@ -14,7 +14,6 @@ export namespace EventsHandler {
         horaterm:string;
     }
     
-
     export const CreateEvent: RequestHandler = async (req: Request, res: Response) => {
         try {
             const ptitulo = req.get('nameEvent');
@@ -37,11 +36,6 @@ export namespace EventsHandler {
                 horaini: `${pData} ${pHoraini}`,
                 horaterm: `${pData} ${pHorarioT}`
             };
-
-            console.dir(process.env.USER);
-            console.dir(process.env.SENHA);
-            console.dir(process.env.ID);
-
             const conn = await OracleDB.getConnection({
                 user: process.env.USER,
                 password: process.env.SENHA,
@@ -52,7 +46,7 @@ export namespace EventsHandler {
             await conn.execute(
 
                 `INSERT INTO events 
-                 VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data, :horaini, :horaterm, :valor, 'pen')`,
+                VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data, :horaini, :horaterm, :valor, 'pen')`,
                 [
                     newEvent.titulo,
                     newEvent.desc,
@@ -94,20 +88,27 @@ export namespace EventsHandler {
             
             
         }
+        export async function selectApostaPen() { 
+            let conn= await OracleDB.getConnection({
+                user:process.env.USER,
+                password: process.env.SENHA,
+                connectString:process.env.ID
+            }); 
+
+            const result = await conn.execute(
+           `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta  FROM events where 
+           aprova='pen'`,   
+            )
+            let linhas = result.rows;
+            await conn.close();
+            return linhas
+            
+        }
+   
         export const nochek:RequestHandler = async (req: Request, res: Response)=>
         {
             
-                let conn= await OracleDB.getConnection({
-                    user:process.env.USER,
-                    password: process.env.SENHA,
-                    connectString:process.env.ID
-                });   
-                const result = await conn.execute(
-                    `Select * FROM events where 
-                    aprova=NULL`,   
-                )
-                await conn.close();
-                res.json(result.rows)
+            res.json(selectApostaPen)
             
         }
         export const futuros:RequestHandler = async (req: Request, res: Response)=>
@@ -119,7 +120,7 @@ export namespace EventsHandler {
                     connectString:process.env.ID
                 });   
                 const result = await conn.execute(
-                    `Select * FROM events where data>CONVERT(date,GETUTCDATE())or
+                    `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta FROM events where data>CONVERT(date,GETUTCDATE())or
                     (data=CONVERT(date,GETUTCDATE()) and fim>CONVERT(time,GETUTCDATE()));`,   
                 )
                 await conn.close();
@@ -128,6 +129,16 @@ export namespace EventsHandler {
         }
     }
 
+
+
+
+
+
+
+
+
+
+    
     export const AvaliarEvento:RequestHandler = async (req:Request, res:Response) => 
     {
     const pEmail =req.get('email');
@@ -150,21 +161,14 @@ export namespace EventsHandler {
             password: process.env.SENHA,
             connectString:process.env.ID
             });   
-            if(!pId || !pRes){
-            const result = await conn.execute(
-                `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta  FROM events where 
-                aprova=NULL`,   
-            )
-            let linhas = result.rows;
-            res.json(linhas)
-
-
-            console.log("Selecione o id que irá aprovar");
-            await conn.close()
+            if(!pId){
+                await conn.close();
+                console.log("Selecione o id que irá aprovar");
+                res.redirect(300,'localhost:3000/events/nochek')
             }else{
                 
                 const id = parseInt(pId) 
-                if(pRes==='sim' || pRes === 'nao'){
+                if(!pRes && pRes==='sim' || pRes === 'nao'){
                 await conn.execute
                 (
                     `Update events set aprova=:aprova where id=:id`,
@@ -184,8 +188,9 @@ export namespace EventsHandler {
                 
                 res.statusCode = 200
                 }else{
-                    res.send('Resposta errada. Por favor digitar sim ou nao')
+                    res.send('Resposta errada ou não encontrada. Por favor digitar sim ou nao')
                     res.statusCode = 400
+                    await conn.close();
                 }
             }
             

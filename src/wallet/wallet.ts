@@ -231,7 +231,7 @@ export namespace WalletHandler {
                     valor = valor + (valor*calc) 
                     await conn.execute(
                         `UPDATE accounts
-                        SET  carteira = carteira + :valor 
+                        SET  carteira = calc_acerto(:valor,carteira) 
                         WHERE email = :email`,
                         [valor, Conta]
                     ) 
