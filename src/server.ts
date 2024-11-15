@@ -1,8 +1,9 @@
 import express from "express";
 import {Request, Response, Router} from "express";
 import { AccountsHandler } from "./accounts/accounts";
-import {EventsHandler} from "./Events/events";
+import {EventsShow} from "./events/eventsShow";
 import { WalletHandler } from "./wallet/wallet";
+import { EventsHandler } from "./events/eventsN";
 
 
 
@@ -43,6 +44,7 @@ routes.patch('/withdrawFunds', WalletHandler.withdrawFunds)
 routes.get('/:id/betOnEvent/', WalletHandler.betOnEvent);
 
 routes.get('/:id/finishEvent/', WalletHandler.finishEvent)
+
 routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)
 
 
@@ -52,10 +54,9 @@ routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)
 
 
 
-
-routes.get('/events/ocoridos',EventsHandler.MostrarEventos.ocoridos);
-routes.get('/events/futuros',EventsHandler.MostrarEventos.futuros);
-routes.get('/events/nochek',EventsHandler.MostrarEventos.nochek);
+routes.get('/events/ocoridos',EventsShow.ocoridos);
+routes.get('/events/futuros',EventsShow.futuros);
+routes.get('/events/nochek',EventsShow.nochek);
 
 //routes.get('')
 
