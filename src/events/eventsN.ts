@@ -9,10 +9,10 @@ export namespace EventsHandler{
     export type Event = {
         titu:String,
         descr:String,
-        data:Date,
-        valor:Number,
-        horarioIni:Date,
-        horarioTerm:Date
+        data:string,
+        valor:string,
+        horarioIni:string,
+        horarioTerm:string
     }
 
     export const CreateEvent: RequestHandler = async (req: Request, res: Response) => {  //Certo, falta algumas restrições
@@ -33,13 +33,13 @@ export namespace EventsHandler{
             const newEvent: Event = {
                 titu: ptitulo,
                 descr: pdesc,
-                data: toDate(pData),
-                valor: parseFloat(pValor),
-                horarioIni: toDate(pData+pHoraini),
-                horarioTerm: toDate(pData+pHorarioT)
+                data: pData,
+                valor: pValor,
+                horarioIni: `${pData} ${pHoraini} `,
+                horarioTerm: `${pData} ${pHorarioT} `
             };
             let hj = new Date();
-            if(newEvent.horarioTerm<hj || newEvent.horarioIni>newEvent.horarioTerm){
+            if(toDate(newEvent.horarioTerm)>hj || toDate(newEvent.horarioIni)>toDate(newEvent.horarioTerm)){
                 const conn = await OracleDB.getConnection({
                 user: process.env.USER,
                 password: process.env.SENHA,
@@ -49,8 +49,8 @@ export namespace EventsHandler{
             console.dir('Conectou');
             await conn.execute(
 
-                `INSERT INTO events 
-                VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data, :horaini, :horaterm, :valor, 'pen')`,
+                `INSERT INTO events (ID, TITULO, DESCR, DATA_APOSTA, INICIO, FIM, VALORAPOSTA, APROVA)
+                VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data_aposta, :inicio, :fim, :valoraposta, 'pen')`,
                 [
                     newEvent.titu,
                     newEvent.descr,
@@ -63,8 +63,17 @@ export namespace EventsHandler{
 
             await conn.commit();
             await conn.close();
+            
+
+
+
+
+
 
             res.status(200).send("Novo evento adicionado com sucesso.");
+        }
+        else{
+            res.status(400).send("Data já expirada")
         }
 
 
@@ -77,18 +86,18 @@ export namespace EventsHandler{
         }
     };
 
-    export const AvaliarEvento:RequestHandler = async (req:Request, res:Response) => 
+    export const AvaliarEvento:RequestHandler = async (req:Request, res:Response) => //falta só descobrir como ele mostra quando o id não está na lista
         {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
-        const pId =res.get('id');
-        const pRes = res.get('res');
-        if(pEmail && pPassword){
+        const pId =req.get('ide');
+        const pRes = req.get('res');
+        if(pEmail && pPassword && pRes){
     
     
             const linhas= await AccountsHandler.login(pEmail, pPassword)
     
-            if(linhas===null){
+            if(linhas===null || linhas === undefined){
                 res.statusCode = 403;
                 res.send('Acesso não permitido.');
             }
@@ -101,7 +110,8 @@ export namespace EventsHandler{
                     res.redirect(300,'localhost:3000/events/nochek')
                 
                 }else{
-                    if(!pRes && pRes==='sim' || pRes === 'nao'){
+                    console.dir(pRes)
+                    if( pRes==='sim' || pRes === 'nao'){
                         let conn= await OracleDB.getConnection({
                             user:process.env.USER,
                             password: process.env.SENHA,
@@ -109,20 +119,35 @@ export namespace EventsHandler{
                             });   
                         
                         const id = parseInt(pId) 
+                    
+    
+    
+                    let result1 = await conn.execute(
+                    `Select id FROM events`,
+                    )
+                    console.dir(result1.rows)
+
+                    
+                    if(!result1.rows?.includes(id)){
+                        await conn.close();
+                        res.status(400).send("Não há um evento com esse id")
+                        return
+                    }
                     await conn.execute
                     (
                         `Update events set aprova=:aprova where id=:id`,
                     [pRes,id]
                     );
-    
-    
-                    const result1 = await conn.execute(
-                    `Select * FROM events where 
-                    id=:id`,
-                    [id]
+
+                    await conn.commit();
+                    
+                    result1 = await conn.execute(
+                        `Select * FROM events where 
+                        id=:id`,
+                        [id]
                     )
                     
-                    await conn.commit();
+                    
                     console.dir(result1.rows,{depth:null})
                     res.status(200).send('Update feito com sucesso')
                     await conn.close();
