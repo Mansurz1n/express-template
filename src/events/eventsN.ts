@@ -46,7 +46,6 @@ export namespace EventsHandler{
                 connectString: process.env.ID
             });
 
-            console.dir('Conectou');
             await conn.execute(
 
                 `INSERT INTO events (ID, TITULO, DESCR, DATA_APOSTA, INICIO, FIM, VALORAPOSTA, APROVA)
@@ -86,7 +85,7 @@ export namespace EventsHandler{
         }
     };
 
-    export const AvaliarEvento:RequestHandler = async (req:Request, res:Response) => //falta só descobrir como ele mostra quando o id não está na lista
+    export const AvaliarEvento:RequestHandler = async (req:Request, res:Response) => 
         {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
@@ -121,18 +120,33 @@ export namespace EventsHandler{
                         const id = parseInt(pId) 
                     
     
-    
+                    //Verificando se o id está na lista
                     let result1 = await conn.execute(
                     `Select id FROM events`,
                     )
-                    console.dir(result1.rows)
 
-                    
-                    if(!result1.rows?.includes(id)){
+
+
+
+                    if(result1.rows){
+                    var TemID = false //Posição do id na lista 
+                    for (var nID in result1.rows){
+                        let  row:string  =result1.rows[nID] as string  
+                        if(parseInt(row[0])===id){
+                            TemID = true
+                            break
+                        }
+                    } 
+
+
+
+                    if(TemID === false){
                         await conn.close();
                         res.status(400).send("Não há um evento com esse id")
                         return
                     }
+
+
                     await conn.execute
                     (
                         `Update events set aprova=:aprova where id=:id`,
@@ -151,7 +165,11 @@ export namespace EventsHandler{
                     console.dir(result1.rows,{depth:null})
                     res.status(200).send('Update feito com sucesso')
                     await conn.close();
-                    
+                    }else{
+                        await conn.close();
+                        res.status(500).send("Erro de conexão com o Banco de dados")
+                        return
+                    }
 
                     }else{
                         res.send('Resposta errada ou não encontrada. Por favor digitar sim ou nao')
@@ -170,29 +188,75 @@ export namespace EventsHandler{
 
         export const DeleteEvent:RequestHandler = async (req:Request,res:Response) => 
         {
-            const pEmail = req.get('email');
-            const pPassword= req.get('password');
-            const pId = req.get('id');
-
-            if(pEmail && pPassword && pId){
-                let conn= await OracleDB.getConnection({
-                    user:process.env.USER,
-                    password: process.env.SENHA,
-                    connectString:process.env.ID
-                    });   
+            try{
+                const pEmail = req.get('email');
+                const pPassword= req.get('password');
+                const pId = req.get('id');
                 
-                await conn.execute(
-                    `DELETE FROM events WHERE id=:id`,
-                    [parseInt(pId)]
-                )
-                await conn.commit();
-                await conn.close();
+                if(pEmail && pPassword && pId){
+                    const linhas= await AccountsHandler.login(pEmail, pPassword)
+                    if(linhas!==null || linhas !== undefined){
+                        
+                        let conn= await OracleDB.getConnection({
+                            user:process.env.USER,
+                            password: process.env.SENHA,
+                            connectString:process.env.ID
+                            });   
+                            const id = parseInt(pId)
 
-                res.send('Delete feito com sucesso')
-                
+
+                            //Verificando se O id está na lista
+                            let result1 = await conn.execute(
+                                `Select id FROM events`,
+                                )
+                                if(result1.rows){
+                                var TemID = false //Posição do id na lista 
+                                for (var nID in result1.rows){
+                                    let  row:string  =result1.rows[nID] as string  
+                                    if(parseInt(row[0])===id){
+                                        TemID = true
+                                        break
+                                    }
+
+                                } 
+            
+                                if(TemID === false){
+                                    await conn.close();
+                                    res.status(400).send("Não há um evento com esse id")
+                                    return
+                                }
+            
+                            }else{
+                                await conn.close();
+                                res.status(500).send("Erro de conexão com o Banco de dados")
+                                return
+                            }
+                        await conn.execute(
+                            `DELETE FROM events WHERE id=:id`,
+                            [id]
+                        )
+                        await conn.commit();
+                        await conn.close();
+    
+                        res.statusCode=200
+
+                        res.send('Delete feito com sucesso')
+
+                        
+                    }else{
+                        res.statusCode = 403;
+                        res.send('Acesso não permitido.');
+                    }
+                    
+                }
+                else{
+                    res.status(500).send("Parametros faltantes")
+                }
+            }catch(error){
+                console.error("Erro ao criar evento:", error);
+                res.status(500).send("Erro ao criar evento.");
             }
-
-
+            
         }
 
 }

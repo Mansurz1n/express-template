@@ -14,9 +14,10 @@ export namespace EventsShow {
                     password: process.env.SENHA,
                     connectString:process.env.ID
                 });   
+                let hj = new Date();
                 const result = await conn.execute(
-                    `Select * FROM events where data<CONVERT(date,GETUTCDATE())or
-                    (data=CONVERT(date,GETUTCDATE()) and fim<CONVERT(time,GETUTCDATE()));`,   
+                    `select * from events where CONVERT(DATE,DATA_APOSTA)<=CONVERT(DATE,:hj) and CONVERT(TIMESTAMP,FIM)<CONVERT(TIMESTAMP,:hj);`,
+                    [hj,hj]   
                 )
                 await conn.close();
                 
@@ -24,7 +25,12 @@ export namespace EventsShow {
             
             
         }
-        export async function selectApostaPen() { 
+
+
+   
+        export const nochek:RequestHandler = async (req: Request, res: Response)=> // unico funcionando por enquanto
+        {
+            
             let conn= await OracleDB.getConnection({
                 user:process.env.USER,
                 password: process.env.SENHA,
@@ -37,14 +43,11 @@ export namespace EventsShow {
             )
             let linhas = result.rows;
             await conn.close();
-            return linhas
+
+            res.json(linhas)
             
-        }
-   
-        export const nochek:RequestHandler = async (req: Request, res: Response)=>
-        {
+        
             
-            res.json(selectApostaPen)
             
         }
         export const futuros:RequestHandler = async (req: Request, res: Response)=>
