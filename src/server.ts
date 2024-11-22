@@ -25,13 +25,13 @@ routes.get('/', (req: Request, res: Response)=>{
 
 
 
-routes.get('/login', AccountsHandler.loginHandler);
+routes.get('/login', AccountsHandler.loginHandler);//!
 
-routes.post('/newEvent',EventsHandler.CreateEvent);
+routes.post('/newEvent',EventsHandler.CreateEvent);//!
 
-routes.post('/signUp', AccountsHandler.createAccountRoute);
+routes.post('/signUp', AccountsHandler.createAccountRoute);//!
 
-routes.patch('/updateEvent', EventsHandler.AvaliarEvento)
+routes.patch('/updateEvent', EventsHandler.AvaliarEvento)//!
 
 
 
@@ -41,11 +41,11 @@ routes.patch('/addFunds',WalletHandler.addfunds);
 routes.patch('/withdrawFunds', WalletHandler.withdrawFunds)
 
 
-routes.get('/:id/betOnEvent/', WalletHandler.betOnEvent);
+routes.get('/betOnEvent/', WalletHandler.betOnEvent);
 
-routes.get('/:id/finishEvent/', WalletHandler.finishEvent)
+routes.get('/finishEvent/', WalletHandler.finishEvent)
 
-routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)
+routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)//!
 
 
 
