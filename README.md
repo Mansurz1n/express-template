@@ -1,5 +1,9 @@
 Time 5 do PI-Codigo 
 
+Terça e quinta
+
+
+
 Nomes: 
 
 
