@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="imagens/icone1.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro | nomesite</title>
+    <style>
+        h1{
+            font-size: 4.5em;
+        }
+        #button {
+            background-color:lightgray;
+            color: black;
+            text-align:center;
+            display: inline-block;
+            cursor: pointer;
+            padding: 7px;
+            border-radius: 5px;
+        }
+        .container {
+            width: 100vw;
+            height: 100vh;
+            background: #6C7A89;
+            color: black;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items:center;
+            
+        }
+        .box  {
+            width: 600px;
+            height: 500px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        body {
+            margin: 0px;
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color:black;
+            color: white;
+        }
+        .green {
+            color: green;
+        }
+
+
+    </style>
+    <script>
+        function CadastrarUsuario () {
+            var name = document.getElementById("name").value;
+            var date = document.getElementById("date").value;
+            var cpf = document.getElementById("cpf").value;
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("pwd").value;
+            /*console.log(name);
+            console.log(date);
+            console.log(cpf);
+            console.log(email);
+            console.log(pwd);*/
+        }
+    </script>
+</head>
+<body>
+    <h1>BET<span class="green">Games</span> </h1>
+<div class="container">
+<div class="box">
+    <h1>Criar conta</h1>
+    <form id="cadastro">
+        <fieldset>
+            <p>
+                <label for="name">Nome:</label>
+                <input id="name" type="text">
+            </p>
+            <p>
+                <label for="date">Data de nascimento:</label>
+                <input id="date" type="date">
+            </p>
+            <p>
+                <label for="cpf">CPF:</label>
+                <input id="cpf" type="number">
+            </p>
+            <p>
+                <label for="email">Email:</label>
+                <input id="email"  type="text">
+            </p>
+            <p>
+                <label for="pwd">Senha:</label>
+                <input  id="pwd" type="password">
+            </p>
+            <button id="button" type="button" onclick="CadastrarUsuario();">Concluído</button>
+            
+            <p>
+                <a href="index.html">Voltar para o login</a>
+            </p>
+    </fieldset>
+    </form>
+</div>
+
+
+
+</div>
+    
+</body>
+</html>
