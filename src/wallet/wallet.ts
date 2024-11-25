@@ -1,7 +1,7 @@
 import {Request, RequestHandler, Response} from "express";
 import OracleDB from "oracledb"
 import { AccountsHandler } from "../accounts/accounts";
-import { parse } from 'date-fns';
+import { parse, toDate } from 'date-fns';
 
 
 export namespace WalletHandler {
@@ -44,7 +44,7 @@ export namespace WalletHandler {
     };
 
 
-    export const betOnEvent: RequestHandler = async (req: Request, res: Response) => {
+    export const betOnEvent: RequestHandler = async (req: Request, res: Response) => {//testado e funfa só n testei umas coisas 
         const pEmail = req.get('email');
         const pValor = req.get('valor');
         const pRes = req.get('res');
@@ -98,7 +98,7 @@ export namespace WalletHandler {
             }
 
             const result = await conn.execute(
-                `Select aprova,fim,valor from events where id=:id`,
+                `Select aprova,fim,valoraposta from events where id=:id`,
                 [id]
             )
             console.dir(result.rows)//
@@ -108,28 +108,36 @@ export namespace WalletHandler {
                 const aprova:string = row[0] as string;
                 const fim:string = row[1] as string;
                 const valor:string = row[2] as string;
+                
+                
+              
+                
                 let date = new Date();
 
-                if(parse(fim,"yyyy-MM-dd HH:MM",new Date)> date)
+                //if(parse(fim,"yyyy/MM/dd HH:MM",new Date())> date)
+                if(toDate(fim)>date)
                 {
-                    res.sendStatus(403).send("Prazo de aposta ja acabou.");
+                    console.dir(fim)
+                    res.status(403).send("Prazo de aposta ja acabou.");
                     await conn.close();
                     return
                 }
-                if(parseFloat(valor)>parseFloat(pValor)){
-                    res.sendStatus(403).send("Valor não é suficuente para apostar nesse evento");
+                else if(parseFloat(valor)>parseFloat(pValor)){
+                    console.dir(valor)
+                    res.status(403).send("Valor não é suficuente para apostar nesse evento");
                     await conn.close();
                     return
                 }
-                if(aprova !== 'sim'){
-                    res.sendStatus(403).send("Evento ainda não disponivel para aposta ou recusado.");
+                else if(aprova !== 'sim'){
+                    console.dir(aprova)
+                    res.status(403).send("Evento ainda não disponivel para aposta ou recusado.");
                     await conn.close();
                     return
                 }
 
             const carteira = await conn.execute(
                 `SELECT carteira FROM accounts WHERE email = :email`,
-                { pEmail }
+                [pEmail]
             )
             console.dir(carteira.rows)
             if(carteira.rows && carteira.rows.length>0){
@@ -146,7 +154,7 @@ export namespace WalletHandler {
 
             await conn.execute(
                 `UPDATE accounts SET carteira = carteira - :carteira WHERE email = :email`,
-                { email:pEmail, carteira: parseFloat(pValor) }
+                [parseFloat(pValor),pEmail]
             );
             
             await conn.execute(
