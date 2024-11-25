@@ -13,9 +13,9 @@ CREATE SEQUENCE SEQ_events START WITH 1 INCREMENT BY 1;
 
 drop SEQUENCE SEQ_accounts;
 CREATE TABLE accounts(
-    Id INTEGER NOT NULL PRIMARY KEY,
+    Id INTEGER NOT NULL Unique,
     nome VARCHAR (50) NOT NULL,
-    email VARCHAR2 (50) NOT NULL UNIQUE ,
+    email VARCHAR2 (50) NOT NULL PRIMARY KEY,
     Password VARCHAR2 (16) NOT NULL,
     birthdate varchar2(20) NOT NULL,
     carteira FLOAT,
@@ -95,3 +95,14 @@ console.log(year + "-" + month + "-" + date);
 // prints date & time in YYYY-MM-DD HH:MM:SS format
 console.log(year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
 
+            async function performLogin(){
+                const loginRoute = "http://localhost:3000/login"
+                var email = document.getElementById("fieldEmail").value;
+                var password = document.getElementById("fieldPassword").value;
+                if(isValid(email,password)){
+                    console.info("Campos validos")
+                    //mando autenticar no backend
+                    const response = await fetch (loginRoute,{method:'POST'});
+                    
+                    if(!response.ok){
+                        showErrorMsg(response.statusText);
