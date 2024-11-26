@@ -43,7 +43,7 @@ routes.patch('/withdrawFunds', WalletHandler.withdrawFunds)
 
 routes.post('/betOnEvent', WalletHandler.betOnEvent);
 
-routes.get('/finishEvent/', WalletHandler.finishEvent)
+routes.patch('/finishEvent', WalletHandler.finishEvent)
 
 routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)//!
 

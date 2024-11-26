@@ -175,7 +175,7 @@ export namespace WalletHandler {
     };
 
    
-    export const withdrawFunds: RequestHandler = async (req: Request, res: Response) => {
+    export const withdrawFunds: RequestHandler = async (req: Request, res: Response) => { //Testado e funcionando
         const pEmail = req.get('email');
         const pValor = req.get('valor');
 
@@ -192,26 +192,7 @@ export namespace WalletHandler {
                 connectString:process.env.ID
             });
 
-            const carteira = await conn.execute(
-                `SELECT carteira FROM accounts WHERE email = :email`,
-                [ pEmail ]
-            );
-            if(carteira.rows){
-
-                const row:string = carteira.rows[0] as string;
-                const dindin:string = row[0]
-
-                if (!dindin || parseFloat(dindin) < parseFloat(pValor)) {
-                    res.status(403).send("Saldo insuficiente para saque.")
-                    await conn.close()
-                    return
-                }
-            }
-
-
             
-
-
             let deposito
             if (parseFloat(pValor)<100){
                 deposito = (parseFloat(pValor)*4/100) + parseFloat(pValor);
@@ -224,6 +205,30 @@ export namespace WalletHandler {
             }else{
                 deposito = parseFloat(pValor);
             }
+
+
+            //Ve se tem saldo suficiente na carteira
+            const carteira = await conn.execute(
+                `SELECT carteira FROM accounts WHERE email = :email`,
+                [ pEmail ]
+            );
+
+            
+
+            if(carteira.rows){
+
+                const row:string = carteira.rows[0] as string;
+
+                const dindin:string = row[0]
+                console.dir(dindin)
+                if (!dindin || parseFloat(dindin) < deposito) {
+                    res.status(403).send("Saldo insuficiente para saque.")
+                    await conn.close()
+                    return
+                }
+            }
+
+
 
 
             await conn.execute(
@@ -245,7 +250,7 @@ export namespace WalletHandler {
     };
 
 
-    export const finishEvent: RequestHandler = async (req: Request, res: Response) => {
+    export const finishEvent: RequestHandler = async (req: Request, res: Response) => {//testado e funcionando(parte de identificação)
         const pId = req.get('id');
         const pRes = req.get('res');
         const pEmail = req.get('email');
@@ -255,10 +260,7 @@ export namespace WalletHandler {
             res.status(400).send("Parâmetros para encerrar o evento estão incompletos.");
             return;
         }
-        if(await AccountsHandler.login(pEmail,pPassword)!=='adm'){
-            res.status(403).send('Acesso não permitido.')
-            return
-        }
+        
 
         try {
             const  conn = await OracleDB.getConnection({
@@ -267,37 +269,70 @@ export namespace WalletHandler {
                 connectString:process.env.ID
             });
 
+
+                //Verificando se o id está na lista
+                let result1 = await conn.execute(
+                    `Select criador FROM events`,
+                )
+            
+            
+            
+            
+                if(result1.rows){
+                    var criador = false //Posição do id na lista 
+                    for (var nID in result1.rows){
+                        let  row:string  =result1.rows[nID] as string  
+                        if(row[0]===pEmail){
+                            criador = true
+                            break
+                            }
+                        } 
+            
+            
+            
+                        if(criador === false){
+                            await conn.close();
+                            res.status(400).send("Criador não encontrado")
+                            return
+                        }
+                    }
+
+
+
+
             const id = parseInt(pId)
             
             const ganhadores = await conn.execute(
-                `select count(*) from apostas where Id_aposta = :id_aposta and res = :res`,
+                `select count(*) from apostas where Id_aposta = :Id_aposta and res = :res`,
                 [id, pRes]
             );
+
             const total = await conn.execute(
-                `select count(*) from apostas where Id_aposta = :id_aposta `,
+                `select count(*) from apostas where Id_aposta = :id_aposta`,
                 [id]
             );
 
             const aprovados = await conn.execute(
-                `select email,valor from from apostas where Id_aposta = :id_aposta and res = :res `,
+                `select email,valor from  apostas where Id_aposta = :id_aposta and res = :res `,
                 [id, pRes]
             )
+
 
 
             if(ganhadores.rows && ganhadores.rows.length>0 && aprovados.rows && aprovados.rows.length>0 && total.rows && total.rows.length>0){
                 const row:string = ganhadores.rows[0] as string;
                 const cont:string = row[0] as string;
-
                 //calculo do ganho valor*perdedores/total
                 let vtotal:string = total.rows[0] as string; 
                 vtotal=vtotal[0]
                 const calc = (parseInt(cont)-parseInt(vtotal))/parseInt(vtotal)
 
-                const app:string = aprovados.rows[0] as string;
-                const vall:string = aprovados.rows[1] as string;
-                for(let a =0;a<=parseInt(cont) ;a++){
-                    let Conta:string = app[a] 
-                    let valorS:string = vall[a]
+                
+                
+                for(let a =0;a<parseInt(cont) ;a++){
+                    const app:string = aprovados.rows[a] as string;         
+                    let Conta:string = app[0] 
+                    let valorS:string = app[1]
                     let valor = parseFloat(valorS)
                     valor = valor + (valor*calc) 
                     await conn.execute(
