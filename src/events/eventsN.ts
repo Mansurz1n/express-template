@@ -34,10 +34,10 @@ export namespace EventsHandler{
             const newEvent: Event = {
                 titu: ptitulo,
                 descr: pdesc,
-                data: pData,
+                data: pData,//Até que dia pode apostar
                 valor: pValor,
-                horarioIni: `${pData} ${pHoraini} `,
-                horarioTerm: `${pData} ${pHorarioT} `
+                horarioIni: pHoraini,//Quando vai acontecer         Exemplo 2025-01-05 10:00 
+                horarioTerm:  pHorarioT//Quando vai terminar        Exemplo 2025-01-05 12:00
             };
             let hj = new Date();
             if(toDate(newEvent.horarioTerm)>hj || toDate(newEvent.horarioIni)>toDate(newEvent.horarioTerm)){
@@ -228,28 +228,7 @@ export namespace EventsHandler{
                                     return
                                 }
 
-                                let result2 = await conn.execute(
-                                    `Select id_aposta FROM apostas`,
-                                    )
-                                    if(result2.rows){
-                                    var TemAposta = false //Posição do id na lista 
-                                    for (var nAposta in result1.rows){
-                                        let  row:string  =result1.rows[nAposta] as string  
-                                        if(parseInt(row[0])===id){
-                                            TemAposta = true
-                                            break
-                                        }
-    
-                                    } 
-                
-                                    if(TemAposta === true){
-                                        await conn.execute(
-                                            `DELETE FROM apostas WHERE id_aposta=:id_aposta`,
-                                            [id]
-                                        )
-                                        
-                                    }
-                                }
+            
             
                             }else{
                                 await conn.close();
@@ -257,7 +236,7 @@ export namespace EventsHandler{
                                 return
                             }
                         await conn.execute(
-                            `DELETE FROM events WHERE id=:id`,
+                            `Update events set aprova='excluido' where id=:id`,
                             [id]
                         )
                         await conn.commit();

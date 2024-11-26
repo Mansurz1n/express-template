@@ -8,21 +8,28 @@ export namespace EventsShow {
         
         export const ocoridos:RequestHandler = async (req: Request, res: Response)=>
         {
-    
-                let conn= await OracleDB.getConnection({
-                    user:process.env.USER,
-                    password: process.env.SENHA,
-                    connectString:process.env.ID
-                });   
-                let hj = new Date();
+            let conn= await OracleDB.getConnection({
+                user:process.env.USER,
+                password: process.env.SENHA,
+                connectString:process.env.ID
+            });   
+            try{
+                
+                
                 const result = await conn.execute(
-                    `select * from events where CONVERT(DATE,DATA_APOSTA)<=CONVERT(DATE,:hj) and CONVERT(TIMESTAMP,FIM)<CONVERT(TIMESTAMP,:hj);`,
-                    [hj,hj]   
+                    `SELECT * FROM EVENTS where TO_DATE(FIM, 'YYYY-MM-DD HH24:MI') <= TRUNC(SYSDATE, 'MI') and aprova='sim'`,   
                 )
+                
                 await conn.close();
                 
                 res.json(result.rows)
-            
+
+            }catch(error){
+                await conn.close();
+                console.error(error);
+                res.status(500).send("Erro ao mostrar os eventos ocorridos.");
+            }
+                
             
         }
 
@@ -59,8 +66,7 @@ export namespace EventsShow {
                     connectString:process.env.ID
                 });   
                 const result = await conn.execute(
-                    `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta FROM events where data>CONVERT(date,GETUTCDATE())or
-                    (data=CONVERT(date,GETUTCDATE()) and fim>CONVERT(time,GETUTCDATE()));`,   
+                    `SELECT * FROM EVENTS where TO_DATE(FIM, 'YYYY-MM-DD HH24:MI') >= TRUNC(SYSDATE, 'MI') and aprova='sim'`,   
                 )
                 await conn.close();
                 res.json(result.rows)

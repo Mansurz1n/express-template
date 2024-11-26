@@ -14,10 +14,7 @@ const routes = Router();
 
 // definir as rotas. 
 // a rota tem um verbo/método http (GET, POST, PUT, DELETE)
-routes.get('/', (req: Request, res: Response)=>{
-    res.statusCode = 403;
-    res.send('Acesso não permitido.');
-});
+routes.get('/', EventsShow.futuros);
 
 // vamos organizar as rotas em outro local 
 
@@ -45,7 +42,7 @@ routes.post('/betOnEvent', WalletHandler.betOnEvent);
 
 routes.patch('/finishEvent', WalletHandler.finishEvent)
 
-routes.delete('/DeleteEvent', EventsHandler.DeleteEvent)//!
+routes.patch('/DeleteEvent', EventsHandler.DeleteEvent)//!
 
 
 

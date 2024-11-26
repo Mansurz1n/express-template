@@ -55,7 +55,7 @@ export namespace AccountsHandler {
         await conn.close();
         if (result===undefined)return undefined
 
-        console.dir(token);
+
 
         
         
@@ -66,8 +66,6 @@ export namespace AccountsHandler {
         const row:string = result.rows[0] as string;
         
         const a:string = row[0] as string
-        console.dir(row);
-        console.dir(a) 
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.
         return a
