@@ -23,8 +23,9 @@ export namespace EventsHandler{
             const pValor = req.get('valor');
             const pHoraini = req.get('HorarioI');
             const pHorarioT = req.get('HorarioT');
+            const pEmail = req.get('email')
 
-            if (!ptitulo || !pdesc || !pData || !pValor || !pHoraini || !pHorarioT) {
+            if (!ptitulo || !pdesc || !pData || !pValor || !pHoraini || !pHorarioT || !pEmail) {
                 res.status(400).send("Parâmetros inválidos");
                 return;
             }
@@ -48,15 +49,16 @@ export namespace EventsHandler{
 
             await conn.execute(
 
-                `INSERT INTO events (ID, TITULO, DESCR, DATA_APOSTA, INICIO, FIM, VALORAPOSTA, APROVA)
-                VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data_aposta, :inicio, :fim, :valoraposta, 'pen')`,
+                `INSERT INTO events (ID, TITULO, DESCR, DATA_APOSTA, INICIO, FIM, VALORAPOSTA, APROVA, CRIADOR)
+                VALUES (SEQ_events.NEXTVAL, :titulo, :descr, :data_aposta, :inicio, :fim, :valoraposta, 'pen', :criador)`,
                 [
                     newEvent.titu,
                     newEvent.descr,
                     newEvent.data,
                     newEvent.horarioIni,
                     newEvent.horarioTerm,
-                    newEvent.valor
+                    newEvent.valor,
+                    pEmail
                 ]
             );
 
@@ -205,7 +207,7 @@ export namespace EventsHandler{
                             const id = parseInt(pId)
 
 
-                            //Verificando se O id está na lista
+                            //Verificando se O id está no evento
                             let result1 = await conn.execute(
                                 `Select id FROM events`,
                                 )
@@ -224,6 +226,29 @@ export namespace EventsHandler{
                                     await conn.close();
                                     res.status(400).send("Não há um evento com esse id")
                                     return
+                                }
+
+                                let result2 = await conn.execute(
+                                    `Select id_aposta FROM apostas`,
+                                    )
+                                    if(result2.rows){
+                                    var TemAposta = false //Posição do id na lista 
+                                    for (var nAposta in result1.rows){
+                                        let  row:string  =result1.rows[nAposta] as string  
+                                        if(parseInt(row[0])===id){
+                                            TemAposta = true
+                                            break
+                                        }
+    
+                                    } 
+                
+                                    if(TemAposta === true){
+                                        await conn.execute(
+                                            `DELETE FROM apostas WHERE id_aposta=:id_aposta`,
+                                            [id]
+                                        )
+                                        
+                                    }
                                 }
             
                             }else{

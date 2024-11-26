@@ -115,7 +115,7 @@ export namespace WalletHandler {
                 let date = new Date();
 
                 //if(parse(fim,"yyyy/MM/dd HH:MM",new Date())> date)
-                if(toDate(fim)>date)
+                if(toDate(fim)<date)
                 {
                     console.dir(fim)
                     res.status(403).send("Prazo de aposta ja acabou.");
@@ -254,9 +254,9 @@ export namespace WalletHandler {
         const pId = req.get('id');
         const pRes = req.get('res');
         const pEmail = req.get('email');
-        const pPassword= req.get('password');
 
-        if (!pId || !pRes || !pEmail || !pPassword) {
+
+        if (!pId || !pRes || !pEmail ) {
             res.status(400).send("Parâmetros para encerrar o evento estão incompletos.");
             return;
         }
@@ -269,38 +269,50 @@ export namespace WalletHandler {
                 connectString:process.env.ID
             });
 
+            const id = parseInt(pId)
 
-                //Verificando se o id está na lista
-                let result1 = await conn.execute(
-                    `Select criador FROM events`,
+
+            let result1 = await conn.execute(
+                `Select id FROM events`,
+                )
+                if(result1.rows){
+                var TemID = false //Posição do id na lista 
+                for (var nID in result1.rows){
+                    let  row1:string  =result1.rows[nID] as string  
+                    if(parseInt(row1[0])===id){
+                        TemID = true
+                        break
+                    }
+                } 
+                if(TemID === false){
+                    await conn.close();
+                    res.status(400).send("Não há um evento com esse id")
+                    return
+                }
+            }
+                //Verificando se é o criador
+                let result2 = await conn.execute(
+                    `Select criador,aprova FROM events where id=:id`,
+                    [id]
                 )
             
             
-            
-            
-                if(result1.rows){
-                    var criador = false //Posição do id na lista 
-                    for (var nID in result1.rows){
-                        let  row:string  =result1.rows[nID] as string  
-                        if(row[0]===pEmail){
-                            criador = true
-                            break
-                            }
-                        } 
-            
-            
-            
-                        if(criador === false){
+                if(result2.rows){
+                    let  row:string  =result2.rows[0] as string 
+                    if(row[1]!=='sim'){
+                        await conn.close();
+                        res.status(403).send("Evento já finalizado ou ainda não aberto.");
+                        return
+                    }
+                    else if(row[0]!==pEmail){
                             await conn.close();
                             res.status(400).send("Criador não encontrado")
                             return
                         }
+
                     }
 
-
-
-
-            const id = parseInt(pId)
+                    
             
             const ganhadores = await conn.execute(
                 `select count(*) from apostas where Id_aposta = :Id_aposta and res = :res`,
@@ -342,6 +354,11 @@ export namespace WalletHandler {
                         [valor, Conta]
                     ) 
                 }
+                await conn.execute
+                    (
+                        `Update events set aprova='nao' where id=:id`,
+                    [id]
+                    );
 
 
             }else {
