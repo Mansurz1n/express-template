@@ -33,6 +33,7 @@ CREATE TABLE events(
     fim varchar2(150),
     valoraposta float,
     aprova varchar2(4),
+    criador varchar2(30)
     PRIMARY KEY (Id)
     );
 drop TABLE events;

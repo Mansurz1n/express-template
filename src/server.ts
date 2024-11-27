@@ -4,7 +4,7 @@ import { AccountsHandler } from "./accounts/accounts";
 import {EventsShow} from "./events/eventsShow";
 import { WalletHandler } from "./wallet/wallet";
 import { EventsHandler } from "./events/eventsN";
-
+import cors from "cors"
 
 
 
@@ -12,6 +12,7 @@ const port = 3000;
 const server = express();
 const routes = Router();
 
+server.use(cors())
 // definir as rotas. 
 // a rota tem um verbo/método http (GET, POST, PUT, DELETE)
 routes.get('/', EventsShow.futuros);
