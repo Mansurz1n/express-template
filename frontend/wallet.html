@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="imagens/icone1.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet</title>
+    <style>
+        h1 {
+            font-size: 3em;
+        }
+        h2 {
+            color: green;
+            font-size: 3em;
+        }
+        .green {
+            color: green;
+        }
+        #area-cabeçalho {
+            background-color: black;
+            padding: 0px;
+            text-align: center;
+            width: 100%;
+        }
+        #area-logo, #area-menu {
+            padding: 10px;
+        }
+        #area-menu {
+            font-size: 1.2em;
+        }
+        a {
+           text-decoration: none; 
+        }
+        a:link, a:visited {
+            color: green;
+            padding: 8px 20px;
+        }
+        a:hover {
+            color:white ;
+            background: green ;
+        }
+        body {
+            display: flex;
+            flex-direction:column;
+            align-items: center;
+            background: rgb(1, 64, 1);
+            color: #ffffff;
+            padding: 0px;
+            font-size: 1rem;
+            transition: all 0.3s ease-in-out;
+        }
+        .container-wallet {
+            margin-top: 30px;
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            animation: fadeIn 0.8s ease-out;
+            border: 2px solid white;
+            padding: 5px;
+            background-color: black;
+        }
+        .dinheiro-wallet {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+        .buttons-wallet {
+            margin-left: 100px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .wallet-btn {
+            padding: 14px 28px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background: green;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            max-width: 250px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .wallet-btn:hover {
+            background: rgb(1, 53, 1);
+            transform: translateY(-5px);
+        }
+        .wallet-btn.sacar {
+            background: #f70101;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .wallet-btn.sacar:hover {
+            background: red;
+            transform: translateY(-5px);
+        }
+        .wallet-btn.historico {
+            background: grey;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3)
+        }
+        .wallet-btn.historico:hover {
+            background: rgb(90, 90, 90);
+            transform: translateY(-5px);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: #1b263b;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.6s ease-in-out;
+        }
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content label,
+        .modal-content input {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            color: #ffffff;
+            font-size: 1.1rem;
+        }
+
+        .modal-content input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 1rem;
+            color: #ffffff;
+            transition: border-color 0.3s ease;
+        }
+        .modal-content button {
+            margin: 15px 10px;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+            transition: transform 0.2s;
+        }
+        .modal-content button:first-child {
+            background: green;
+            color: white;
+        }
+
+        .modal-content button:last-child {
+            background: #f44336;
+            color: white;
+        }
+        .modal-content button:hover {
+            transform: scale(1.05);
+        }
+
+        .modal-content button:active {
+            transform: scale(1);
+        }
+        @media (max-width: 768px) {
+
+            .dinheiro-wallet {
+                font-size: 1.6rem;
+            }
+
+            .wallet-btn {
+                font-size: 1.1rem;
+            }
+
+            .modal-content {
+                width: 80%;
+            }
+
+            .modal-content button {
+                font-size: 1.1rem;
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .dinheiro-wallet {
+                font-size: 1.4rem;
+            }
+
+            .wallet-btn {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+
+            .modal-content button {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="area-cabeçalho">
+        <div id="area-logo">
+            <h1>Bet<span class="green">Games</span></h1>
+        </div>
+            <div id="area-menu">
+                <a href="Home.html">Home</a>
+                <a href="CriarEvento.html">Criar Evento</a>
+                <a href="wallet.html">Wallet</a>
+                <a href="login.html">Sair</a>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="container-wallet">
+        <h2>Minha carteira</h2>
+        <p class="dinheiro-wallet">Saldo atual: <span id="SaldoAtual">R$ 0,00</span></p>
+        <div class="buttons-wallet">
+            <button class="wallet-btn" onclick="AddCredit()">Depositar Saldo</button>
+            <button class="wallet-btn sacar" onclick="WithdrawCredit()">Sacar Saldo</button>
+            <button class="wallet-btn historico" onclick="ShowRecord()">Histórico</button>            
+        </div>
+    </div>
+
+    <div id="AddCreditModal" class="modal">
+        <div class="modal-content">
+            <h2>Adicionar Saldo</h2>
+            <input type="number" id="qtdCredito" placeholder="Valor: (R$)" class="modal-input">
+            <div class="modal-actions">
+                <button class="modal-button" onclick="ConfirmAdd()">Confirmar</button>
+                <button class="modal-button fechar" onclick="Cancel()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <div id="withdrawCreditModal" class="modal">
+        <div class="modal-content">
+            <h2>Sacar Saldo</h2>
+            <input type="number" id="withdrawAmount" placeholder="Valor em R$" class="modal-input">
+            <input type="text" id="bankDetails" placeholder="Conta bancária " class="modal-input">
+            <div class="modal-actions">
+                <button class="modal-button" onclick="ConfirmWithdraw()">Confirmar</button>
+                <button class="modal-button close" onclick="Cancel()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <div id="ShowRecordModal" class="modal">
+        <div class="modal-content">
+            <h2>Histórico de apostas</h2>
+            
+            <input type="text" id="bankDetails" placeholder="Conta bancária " class="modal-input">
+            <div class="modal-actions">
+                <button class="modal-button" onclick="ConfirmWithdraw()">Confirmar</button>
+                <button class="modal-button close" onclick="Cancel()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function AddCredit() {
+                    document.getElementById('AddCreditModal').style.display = 'flex';
+                }
+
+                function WithdrawCredit() {
+                    document.getElementById('withdrawCreditModal').style.display = 'flex';
+                }
+
+                function Cancel() {
+                    document.getElementById('AddCreditModal').style.display = 'none';
+                    document.getElementById('withdrawCreditModal').style.display = 'none';
+                }
+
+                async function confirmAdd() {
+                    const amount = document.getElementById('qtdCredito').value;
+                    if (amount <= 0) {
+                        alert("Valor inválido.");
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch('http://localhost:3000/addFunds', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ amount })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.status === 201) {
+                            alert('Créditos adicionados com sucesso!');
+                            loadBalance();
+                        } else {
+                            alert(`Erro: ${data.message}`);
+                        }
+                    } catch (error) {
+                        console.error("Erro ao adicionar créditos:", error);
+                        alert("Erro ao adicionar créditos.");
+                    }
+                }
+
+                async function confirmWithdraw() {
+                    const amount = parseFloat(document.getElementById('withdrawAmount').value); // Garantir que é um número
+                    const bankDetails = document.getElementById('bankDetails').value;
+
+                    if (amount <= 0 || !bankDetails) {
+                        alert("Preencha os campos corretamente.");
+                        return;
+                    }
+
+                    // Calcula a taxa com base na tabela disponibilizada
+                    let fee = 0;
+
+                    if (amount <= 100) {
+                        fee = amount * 0.04;  
+                    } else if (amount <= 1000) {
+                        fee = amount * 0.03;  
+                    } else if (amount <= 5000) {
+                        fee = amount * 0.02;  
+                    } else if (amount <= 100000) {
+                        fee = amount * 0.01;  
+                    } else {
+                        fee = 0; 
+                    }
+
+                    // Exibe o valor da taxa para o usuário
+                    const totalAmount = amount - fee;  // O valor que será sacado após descontada a taxa
+                    alert(`Taxa de saque: R$ ${fee.toFixed(2)}. O valor a ser sacado é R$ ${totalAmount.toFixed(2)}.`);
+
+                    try {
+                        const response = await fetch('http://localhost:3000/withdrawFunds', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ amount, bankDetails, fee })  // Envia a taxa também para o servidor
+                        });
+
+                        const data = await response.json();
+
+                        if (response.status === 200) {
+                            alert('Saque realizado com sucesso!');
+                            loadBalance(); // Atualiza o saldo após o saque
+                        } else {
+                            alert(`Erro: ${data.message}`);
+                        }
+                    } catch (error) {
+                        console.error("Erro ao realizar saque:", error);
+                        alert("Erro ao realizar saque.");
+                    }
+                }
+
+                async function loadBalance() {
+                    try {
+                        const response = await fetch('http://localhost:3000/getBalance', {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+
+                        const data = await response.json();
+                        document.getElementById('currentBalance').textContent = `R$ ${data.balance.toFixed(2)}`;
+                    } catch (error) {
+                        console.error("Erro ao carregar saldo:", error);
+                        alert("Erro ao carregar saldo.");
+                    }
+                }   
+                loadBalance(); /*atualiza o saldo */
+    </script>
+    
+</body>
+</html>

@@ -9,8 +9,19 @@
         h1{
             font-size: 4.5em;
         }
+        a {
+            text-decoration: none;
+        }
+        a:link, a:visited {
+            color: green;
+            padding: 3px 7px;
+        }
+        a:hover {
+            color: white;
+            background: green;
+        }   
         #button {
-            background-color:lightgray;
+            background-color:green;
             color: black;
             text-align:center;
             display: inline-block;
@@ -21,8 +32,8 @@
         .container {
             width: 100vw;
             height: 100vh;
-            background: #6C7A89;
-            color: black;
+            background: rgb(1, 63, 1);
+            color: green;
             display: flex;
             flex-direction: row;
             justify-content: center;
@@ -35,6 +46,10 @@
             background: white;
             border-radius: 10px;
             text-align: center;
+        }
+        form input {
+            border: 3px solid green;
+            background-color: white;
         }
         body {
             margin: 0px;
@@ -94,7 +109,7 @@
             <button id="button" type="button" onclick="CadastrarUsuario();">Concluído</button>
             
             <p>
-                <a href="index.html">Voltar para o login</a>
+                <a href="login.html">Voltar para o login</a>
             </p>
     </fieldset>
     </form>
