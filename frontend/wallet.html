@@ -280,11 +280,8 @@
     <div id="ShowRecordModal" class="modal">
         <div class="modal-content">
             <h2>Histórico de apostas</h2>
-            
-            <input type="text" id="bankDetails" placeholder="Conta bancária " class="modal-input">
             <div class="modal-actions">
-                <button class="modal-button" onclick="ConfirmWithdraw()">Confirmar</button>
-                <button class="modal-button close" onclick="Cancel()">Cancelar</button>
+                <button class="modal-button close" onclick="Cancel()">Sair</button>
             </div>
         </div>
     </div>
@@ -302,6 +299,7 @@
                 function Cancel() {
                     document.getElementById('AddCreditModal').style.display = 'none';
                     document.getElementById('withdrawCreditModal').style.display = 'none';
+                    document.getElementById('ShowRecordModal').style.display = 'none';
                 }
 
                 async function confirmAdd() {
@@ -401,6 +399,9 @@
                         console.error("Erro ao carregar saldo:", error);
                         alert("Erro ao carregar saldo.");
                     }
+                }
+                function ShowRecord() {
+                    document.getElementById('ShowRecordModal').style.display = 'flex';
                 }   
                 loadBalance(); /*atualiza o saldo */
     </script>
