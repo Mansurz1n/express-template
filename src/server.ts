@@ -5,7 +5,7 @@ import { AccountsHandler } from "./accounts/accounts";
 import {EventsShow} from "./events/eventsShow";
 import { WalletHandler } from "./wallet/wallet";
 import { EventsHandler } from "./events/eventsN";
-import cors from "cors"
+
 
 
 
@@ -13,13 +13,7 @@ const port = 3000;
 const server = express();
 const routes = Router();
 
-<<<<<<< Updated upstream
 server.use(cors())
-=======
-
-server.use(cors());
-
->>>>>>> Stashed changes
 // definir as rotas. 
 // a rota tem um verbo/método http (GET, POST, PUT, DELETE)
 routes.get('/', EventsShow.futuros);
