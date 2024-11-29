@@ -32,7 +32,7 @@ routes.post('/signUp', AccountsHandler.createAccountRoute);//!
 routes.patch('/updateEvent', EventsHandler.AvaliarEvento)//!
 
 
-
+routes.get('/Search',EventsShow.SearchEvent);
 
 routes.patch('/addFunds',WalletHandler.addfunds);
 

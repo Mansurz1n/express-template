@@ -71,7 +71,30 @@ export namespace EventsShow {
                 await conn.close();
                 res.json(result.rows)
             
-    }
+        }
+
+        export const  SearchEvent:RequestHandler = async (req:Request, res:Response)=>{
+            
+            let pNome = req.get('nome');
+            
+            if(pNome){
+                pNome = '%'+pNome+'%'
+                let conn= await OracleDB.getConnection({
+                    user:process.env.USER,
+                    password: process.env.SENHA,
+                    connectString:process.env.ID
+                });   
+                const result = await conn.execute(
+                    `SELECT * FROM EVENTS where titulo like :titulo`,
+                    [pNome]   
+                )
+                await conn.close();
+                res.json(result.rows)
+            }else{
+                res.send('Por favor digite um titulo.')
+            }
+            
+        }
 }
 
 
