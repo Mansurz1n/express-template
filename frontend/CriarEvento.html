@@ -162,6 +162,56 @@
         
     </style>
     <script>
+        async function criarEvento(event) {
+            event.preventDefault(); // Impede o envio padrão do formulário
+            
+            // Pegando os dados do formulário
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const quotaValue = document.getElementById("quotaValue").value;
+            const betStart = document.getElementById("betStart").value;
+            const betEnd = document.getElementById("betEnd").value;
+            const eventDate = document.getElementById("eventDate").value;
+
+            // Enviando dados para o back-end com fetch
+            try {
+                const response = await fetch("http://localhost:3000/newEvent", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        quotaValue,
+                        betStart,
+                        betEnd,
+                        eventDate
+                    }),
+                });
+
+                const result = await response.json(); // Supondo que o back-end retorne um JSON
+                if (response.ok) {
+                    // Se a resposta for ok, mostra uma mensagem de sucesso
+                    document.getElementById("responseMessage").style.color = "green";
+                    document.getElementById("responseMessage").textContent = result.message;
+                } else {
+                    // Caso contrário, mostra o erro
+                    document.getElementById("responseMessage").style.color = "red";
+                    document.getElementById("responseMessage").textContent = result.message;
+                }
+            } catch (error) {
+                console.error("Erro ao criar evento:", error);
+                document.getElementById("responseMessage").style.color = "red";
+                document.getElementById("responseMessage").textContent = "Erro ao tentar criar o evento!";
+            }
+        }
+
+        // Adicionando o evento de envio do formulário
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("createEventForm");
+            form.addEventListener("submit", criarEvento);
+        });
 
     </script>
 </head>
