@@ -109,10 +109,21 @@
             if (isValid(email,password)) {
                 console.info("Campos válidos")
                 //autenticar no back
-              /*  const response = await fetch (loginRoute,{method:'POST'});  
+              const response = await fetch (loginRoute,{method:'GET',
+                headers:{
+                    "email":email,
+                    "password":password
+                }
+              }); 
+
                 if(!response.ok){
                     showErrorMsg(response.statusText);
-                }*/
+                    const error = await response.text();
+                    alert(`Erro no cadastro: ${error});`);
+                }else{
+                    const result = await response.text();
+                    alert(result);
+                }
             }
         }
 
