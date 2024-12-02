@@ -9,9 +9,11 @@ import { EventsHandler } from "./events/eventsN";
 
 
 
+
 const port = 3000; 
 const server = express();
 const routes = Router();
+
 
 server.use(cors())
 // definir as rotas. 
@@ -32,8 +34,9 @@ routes.post('/signUp', AccountsHandler.createAccountRoute);//!
 
 routes.patch('/updateEvent', EventsHandler.AvaliarEvento)//!
 
+routes.get('/getWallet',AccountsHandler.getWallet);
 
-
+routes.get('/Search',EventsShow.SearchEvent);
 
 routes.patch('/addFunds',WalletHandler.addfunds);
 
@@ -50,7 +53,7 @@ routes.patch('/DeleteEvent', EventsHandler.DeleteEvent)//!
 
 
 
-routes.get('/Search',EventsShow.SearchEvent);
+
 
 
 routes.get('/events/ocoridos',EventsShow.ocoridos);

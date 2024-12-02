@@ -23,11 +23,50 @@ export namespace AccountsHandler {
     };
  
     //estudar .env(Dotenv)
-
-
-
-
-
+    export const getWallet: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+        // Verificar se o token de autenticação foi fornecido
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            res.status(401).json({ error: 'Token não fornecido.' });
+            return;
+        }
+    
+        try {
+            // Decodificar o token JWT para obter o email do usuário
+            const decoded = jwt.verify(token, `${process.env.CHAVE}`) as JwtPayload;
+            const email = decoded.email;
+    
+            // Conectar ao banco de dados Oracle
+            const conn = await OracleDB.getConnection({
+                user: process.env.USER,
+                password: process.env.SENHA,
+                connectString: process.env.ID,
+            });
+    
+            // Consultar o saldo da carteira do usuário no banco de dados
+            const result = await conn.execute(
+                `SELECT carteira FROM accounts WHERE email = :email`,
+                [email]
+            );
+    
+            // Fechar a conexão com o banco
+            await conn.close();
+    
+            // Garantir que o TypeScript reconheça o formato de result.rows
+            const rows = result.rows as Array<[number]> | undefined;
+    
+            // Verificar se o saldo foi encontrado
+            if (rows && rows.length > 0) {
+                const wallet = rows[0][0]; // Primeiro registro, primeira coluna
+                res.status(200).json({ balance: wallet });
+            } else {
+                res.status(404).json({ error: 'Usuário não encontrado.' });
+            }
+        } catch (err) {
+            console.error('Erro ao obter carteira:', err);
+            res.status(500).json({ error: 'Erro interno do servidor.' });
+        }
+    };
 
     export function verificar(req:Request ,res:Response ,next:NextFunction,token: string | undefined ){
         console.dir(token)
@@ -95,6 +134,8 @@ export namespace AccountsHandler {
        
 
         res.setHeader('authorization',`${accessToken}`)
+        console.log('Cabeçalho Authorization:', res.getHeaders()['authorization']);
+
         console.dir(accessToken)
         return accessToken
         }
@@ -210,6 +251,9 @@ export namespace AccountsHandler {
             res.send("Parâmetros inválidos");
         }
     }
+    
+    
+    
 
 }
 

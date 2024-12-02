@@ -122,7 +122,19 @@
                     alert(`Erro no cadastro: ${error}`);
                 }else{
                     const result = await response.text();
+                    console.log(response.headers.authorization);
+                    const token = response.headers.get('authorization');
+                    console.log('Token recebido:', token);  // Verifique se o token está correto
+                    if (token) {
+                        localStorage.setItem('token', token); 
+                        console.log('Token armazenado no localStorage:', localStorage.getItem('token'));  // Verifique se foi armazenado
+                    }else {
+                        console.error('Token não encontrado na resposta');
+                    }
+
+                    
                     alert(result);
+                    //window.location.href = "wallet.html";
                 }
             }
         }

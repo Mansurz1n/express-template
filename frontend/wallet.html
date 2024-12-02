@@ -287,6 +287,35 @@
     </div>
 
     <script>
+        function verificar(){
+            console.log(localStorage.getItem('token'));
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("Usuário não autenticado. Redirecionando para o login...");
+                return;
+            }else{
+                alert("Token funfando");
+            }
+        }
+        async function loadBalance() {
+    try {
+        const response = await fetch('http://localhost:3000/getWallet', {
+            headers: {
+                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbSIsImZ1bmNhbyI6Im4iLCJjYXJ0ZWlyYSI6MCwiaWF0IjoxNzMzMTc4NjYwLCJleHAiOjE3MzMxODU4NjB9.1HEvSQHJel2YQnsjEvsPHKqVq4xnhZkb7VjEdnKPvVo`
+            }
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            document.getElementById('SaldoAtual').textContent = `R$ ${data.balance.toFixed(2)}`;
+        } else {
+            alert(`Erro ao carregar saldo: ${data.error}`);
+        }
+    } catch (error) {
+        console.error("Erro ao carregar saldo:", error);
+        alert("Erro ao carregar saldo.");
+    }
+}
 
         function AddCredit() {
                     document.getElementById('AddCreditModal').style.display = 'flex';
@@ -311,7 +340,7 @@
                     
                     try {
                         const response = await fetch('http://localhost:3000/addFunds', {
-                            method: 'POST',
+                            method: 'PATCH',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                                 'Content-Type': 'application/json'
@@ -363,7 +392,7 @@
 
                     try {
                         const response = await fetch('http://localhost:3000/withdrawFunds', {
-                            method: 'POST',
+                            method: 'PATCH',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('token')}`,
                                 'Content-Type': 'application/json'
@@ -384,26 +413,14 @@
                         alert("Erro ao realizar saque.");
                     }
                 }
+                
 
-                async function loadBalance() {
-                    try {
-                        const response = await fetch('http://localhost:3000/getBalance', {
-                            headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            }
-                        });
-
-                        const data = await response.json();
-                        document.getElementById('currentBalance').textContent = `R$ ${data.balance.toFixed(2)}`;
-                    } catch (error) {
-                        console.error("Erro ao carregar saldo:", error);
-                        alert("Erro ao carregar saldo.");
-                    }
-                }
+                
                 function ShowRecord() {
                     document.getElementById('ShowRecordModal').style.display = 'flex';
                 }   
                 loadBalance(); /*atualiza o saldo */
+                verificar();
     </script>
     
 </body>
