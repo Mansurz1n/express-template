@@ -1,4 +1,4 @@
-import {Request, Response, RequestHandler} from "express";
+import {Request, Response, RequestHandler, NextFunction} from "express";
 import OracleDB from "oracledb";
 import { AccountsHandler } from "../accounts/accounts";
 import { toDate } from "date-fns";
@@ -87,28 +87,35 @@ export namespace EventsHandler{
         }
     };
 
-    export const AvaliarEvento:RequestHandler = async (req:Request, res:Response) => 
+    export const AvaliarEvento:RequestHandler = async (req:Request, res:Response,next:NextFunction) => 
         {
-        const pEmail =req.get('email');
-        const pPassword = req.get('password');
+        const token = req.get('authorization');
         const pId =req.get('ide');
         const pRes = req.get('res');
-        if(pEmail && pPassword && pRes){
+        if(pRes){
     
     
-            const linhas= await AccountsHandler.login(pEmail, pPassword)
-    
-            if(linhas===null || linhas === undefined){
+            await AccountsHandler.verificar(req,res,next,token)
+            const user = (req as any).user
+           if(!user || !user.funcao){
+                res.statusCode = 403;
+                res.send('Falha no login.');
+                return
+           }
+           else{
+            const funcao =user.funcao
+            if(funcao==='n' || funcao === undefined){
                 res.statusCode = 403;
                 res.send('Acesso não permitido.');
+                return
             }
 
             else
             {
+                
                 if(!pId){
 
                     console.dir("Selecione o id que irá aprovar");
-                    res.redirect(300,'localhost:3000/events/nochek')
                 
                 }else{
                     console.dir(pRes)
@@ -167,6 +174,7 @@ export namespace EventsHandler{
                     console.dir(result1.rows,{depth:null})
                     res.status(200).send('Update feito com sucesso')
                     await conn.close();
+                    return
                     }else{
                         await conn.close();
                         res.status(500).send("Erro de conexão com o Banco de dados")
@@ -176,28 +184,35 @@ export namespace EventsHandler{
                     }else{
                         res.send('Resposta errada ou não encontrada. Por favor digitar sim ou nao')
                         res.statusCode = 400
+                        return
                     }
                 }
                 
-    
+                }
                 
             }
         }else{
             res.send('Faltando Parametros')
+            return
         }
     
         }   
 
-        export const DeleteEvent:RequestHandler = async (req:Request,res:Response) => 
+        export const DeleteEvent:RequestHandler = async (req:Request,res:Response,next:NextFunction) => 
         {
             try{
-                const pEmail = req.get('email');
-                const pPassword= req.get('password');
                 const pId = req.get('id');
-                
-                if(pEmail && pPassword && pId){
-                    const linhas= await AccountsHandler.login(pEmail, pPassword)
-                    if(linhas!==null || linhas !== undefined){
+                const token = req.headers['authorization'];
+                if(pId){
+                    AccountsHandler.verificar(req,res,next,token)
+                    const user = (req as any).user
+                    if(!user || !user.funcao){
+                        res.statusCode = 403;
+                        res.send('Login não efetuado.');
+                    }
+                    else{
+                    const funcao =user.funcao
+                    if(funcao!=='n' || funcao !== undefined){
                         
                         let conn= await OracleDB.getConnection({
                             user:process.env.USER,
@@ -251,7 +266,7 @@ export namespace EventsHandler{
                         res.statusCode = 403;
                         res.send('Acesso não permitido.');
                     }
-                    
+                    }
                 }
                 else{
                     res.status(500).send("Parametros faltantes")

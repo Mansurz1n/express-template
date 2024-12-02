@@ -1,6 +1,7 @@
-import {Request, RequestHandler, Response} from "express";
+import {Request, RequestHandler, response, Response} from "express";
 import OracleDB from "oracledb"
-
+import jwt, { JwtPayload } from "jsonwebtoken"; 
+import { NextFunction } from "express-serve-static-core";
 
 require('dotenv').config()
 /*
@@ -16,14 +17,33 @@ export namespace AccountsHandler {
         name:string;
         email:string;
         password:string;
-        birthdate:string; 
+        birthdate:string;
+        carteira: number;
+        funcao :string;
     };
  
     //estudar .env(Dotenv)
 
-    
 
-    export async function login(email:string, password:string){
+
+
+
+
+    export function verificar(req:Request ,res:Response ,next:NextFunction,token: string | undefined ){
+        console.dir(token)
+        if(!token)return res.status(401).json({auth:false, mesage:'Login não efetuado.'})
+        try{
+            const decoded =jwt.verify(token,`${process.env.CHAVE}`)
+            console.dir(decoded)
+            req.user = decoded 
+            return
+        }catch{
+            return res.status(403).json({ message: 'Token inválido ou expirado' });
+        };
+
+    }
+
+    export async function login(email:string, password:string,res:Response){
         //passo a passo 
         //conectar no oracle 
         let conn=await OracleDB.getConnection({
@@ -33,52 +53,50 @@ export namespace AccountsHandler {
         });
         //fazer o select para verificar se a conta exixste.
         const result = await conn.execute(
-            `Select funcao FROM accounts where email = :email and password = :password`,
+            `Select funcao,carteira FROM accounts where email = :email and password = :password`,
             [ email, password]
         )
-        let linhas = result.rows;
-        console.dir(linhas,{depth:null});
-        await conn.commit();
         
-        await conn.execute(
-        `begin
-            dbms_output.ENABLE(NULL);
-        end;`
-        )
-        const token = await conn.execute(
-            `begin
-                dbms_output.put_line(dbms_random.string('x',16));
-            end;`
-        )
-
-
-        await conn.close();
-        if (result===undefined)return undefined
-
-
-
-        
-        
-
-
-
         if(result.rows && result.rows.length>0){
         const row:string = result.rows[0] as string;
-        
-        const a:string = row[0] as string
+        const carteira:string = row[1] as string
+        const funcao:string = row[0] as string
         //se a conta existe, preencher o objeto conta.
         //se não existe, devolver undefined.
-        return a
+        const accessToken = jwt.sign({email, funcao, carteira}, `${process.env.CHAVE}`,{
+            expiresIn:"2h"
+        });
+
+        
+
+       
+
+        res.setHeader('authorization',`${accessToken}`)
+        console.dir(accessToken)
+        return accessToken
         }
+        return
     }
-    export const loginHandler:RequestHandler = async (req:Request, res:Response) => {
+
+    export const loginHandler:RequestHandler = async (req:Request, res:Response,next:NextFunction) => {
         const pEmail =req.get('email');
         const pPassword = req.get('password');
+        
         if(pEmail && pPassword){
-            let b = login(pEmail,pPassword)
-            if (await b==='n') res.send(`Login Efetuado com sucesso`)
-            else if (await b==='adm')res.send('Bem vindo adm')        
-            else res.send('Conta não encontrada')
+            let token = await login(pEmail,pPassword,res) 
+            if(token){
+            const decoded =jwt.verify(token,`${process.env.CHAVE}`)
+            console.dir(decoded)
+            req.user = decoded 
+            const user = (req as any).user
+            if(user && user.funcao){
+                const funcao =user.funcao
+                console.dir(funcao)
+            if (await funcao==='n') res.json({auth: true, token:token ,mesage:`Login Efetuado com sucesso`})
+            else if (await funcao==='adm')res.json({auth:true, token:token, mesage:'Bem vindo adm'})        
+            else res.json({auth:false, token:null, mesage:'Conta não encontrada'})
+            }
+            }
         }else{
             res.send('Faltando parametros')
         }
@@ -157,6 +175,8 @@ export namespace AccountsHandler {
                 email: pEmail, 
                 password: pPassword,
                 birthdate: pBirthdate,
+                carteira: 0 ,
+                funcao:'n'
             }
             const ID = saveNewAccount(newAccount);
             
