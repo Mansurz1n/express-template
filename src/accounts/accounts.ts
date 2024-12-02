@@ -51,7 +51,30 @@ export namespace AccountsHandler {
             password: process.env.SENHA,
             connectString:process.env.ID
         });
-        //fazer o select para verificar se a conta exixste.
+
+        //Verificando se o email existe
+        let result1 = await conn.execute(
+            `Select email FROM accounts`,
+            )
+            if(result1.rows){
+            var TemEmail = false //Posição do id na lista 
+            for (var nID in result1.rows){
+                let  row:string  =result1.rows[nID] as string  
+                if(row[0]===email){
+                    TemEmail = true
+                    break
+                }
+
+            } 
+
+            if(TemEmail === false){
+                await conn.close();
+                res.status(400).send("Não há uma conta com esse email.")
+                return
+            }
+        }
+
+
         const result = await conn.execute(
             `Select funcao,carteira FROM accounts where email = :email and password = :password`,
             [ email, password]
