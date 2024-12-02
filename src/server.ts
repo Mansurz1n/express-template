@@ -33,7 +33,7 @@ routes.post('/signUp', AccountsHandler.createAccountRoute);//!
 routes.patch('/updateEvent', EventsHandler.AvaliarEvento)//!
 
 
-routes.get('/Search',EventsShow.SearchEvent);
+
 
 routes.patch('/addFunds',WalletHandler.addfunds);
 
@@ -50,7 +50,7 @@ routes.patch('/DeleteEvent', EventsHandler.DeleteEvent)//!
 
 
 
-
+routes.get('/Search',EventsShow.SearchEvent);
 
 
 routes.get('/events/ocoridos',EventsShow.ocoridos);

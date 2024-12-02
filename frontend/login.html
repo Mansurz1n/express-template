@@ -119,7 +119,7 @@
                 if(!response.ok){
                     showErrorMsg(response.statusText);
                     const error = await response.text();
-                    alert(`Erro no cadastro: ${error});`);
+                    alert(`Erro no cadastro: ${error}`);
                 }else{
                     const result = await response.text();
                     alert(result);

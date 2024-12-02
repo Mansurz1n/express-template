@@ -17,7 +17,7 @@ export namespace EventsShow {
                 
                 
                 const result = await conn.execute(
-                    `SELECT * FROM EVENTS where TO_DATE(FIM, 'YYYY-MM-DD HH24:MI') <= TRUNC(SYSDATE, 'MI') and aprova='sim'`,   
+                    `SELECT * FROM EVENTS where TO_DATE(FIM, 'YYYY-MM-DD"T"HH24:MI') <= TRUNC(SYSDATE, 'MI') and aprova='sim' ORDER BY ID ASC`,   
                 )
                 
                 await conn.close();
@@ -46,7 +46,7 @@ export namespace EventsShow {
 
             const result = await conn.execute(
            `Select Id, titulo, descr, data_aposta, inicio, fim, valoraposta  FROM events where 
-           aprova='pen'`,   
+           aprova='pen' ORDER BY ID ASC`,   
             )
             let linhas = result.rows;
             await conn.close();
@@ -66,7 +66,7 @@ export namespace EventsShow {
                     connectString:process.env.ID
                 });   
                 const result = await conn.execute(
-                    `SELECT * FROM EVENTS where TO_DATE(FIM, 'YYYY-MM-DD HH24:MI') >= TRUNC(SYSDATE, 'MI') and aprova='sim'`,   
+                    `SELECT * FROM EVENTS where TO_DATE(FIM, 'YYYY-MM-DD"T"HH24:MI') >= TRUNC(SYSDATE, 'MI') and aprova='sim' ORDER BY ID ASC`,   
                 )
                 await conn.close();
                 res.json(result.rows)
@@ -85,7 +85,7 @@ export namespace EventsShow {
                     connectString:process.env.ID
                 });   
                 const result = await conn.execute(
-                    `SELECT * FROM EVENTS where titulo like :titulo`,
+                    `SELECT * FROM EVENTS where titulo like :titulo ORDER BY ID ASC`,
                     [pNome]   
                 )
                 await conn.close();

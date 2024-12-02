@@ -78,6 +78,7 @@
             font-size: 3em;
         }
     </style>
+
 </head>
 <body>
 
@@ -97,7 +98,7 @@
 
     </div>
     <div class="search-container">
-        <input type="text" placeholder="Buscar eventos" id="searchInput">
+        <input  id="Search" type="text" placeholder="Buscar eventos" id="searchInput">
         <button id="SearchBtn" onclick="SearchEvents()">Buscar</button>
     </div>
     <div id="container-evento">
@@ -105,7 +106,7 @@
             <h2>Eventos disponíveis</h2>
             <div class="row align-items-center" >
                 <div class="col">
-                  <table id="tableProducts" class="table">
+                  <table id="EventosTabela" class="table">
                       <thead>
                         <tr>
                           <th scope="col" class="text-left ">ID</th>
@@ -115,14 +116,81 @@
                         </tr>
                       </thead>
                       <tbody>
-                        
+                            
                       </tbody>
                     </table>
                 </div>
-              </div>
+            </div>
+        </div>
+              <div class="row">
+                <div class="col">
+                    <nav aria-label="..." style="float:right;">
+                        <ul id="ulPaginator" class="pagination pagination-sm">
+                            <li class="page-item active"><a class="page-link" href="javascript:Events();">1</a></li>
+                        </ul>
+                      </nav>
+                </div>
+            </div>
+
     </div>
     <script>
-        
+        var EventosTabela = document.getElementById('EventosTabela');
+
+        function EventoShow(element) {
+
+            let e = parseFloat(element[6]);
+            
+            const EventonaTabela = 
+                    `<tr id="${element.ID}">
+                        <td class="text-left">${element[0]}</th>
+                        <td class="text-left">${element[1]}</td>
+                        <td class="text-end">${e.toFixed(2)}</td>
+                        <td class="text-center"> ${element[3]}</td>
+                    </tr>`;
+            EventosTabela.getElementsByTagName('tbody')[0].insertAdjacentHTML("beforeend", EventonaTabela)
+                
+            
+        }
+
+        async function SearchEvents() {
+            var Nome = document.getElementById("Search").value;
+            if(!Nome){
+                alert("Por favor digite algo.")
+            }else{
+                    const response = await fetch("http://localhost:3000/Search",{
+                        method:"GET",
+                        headers:{
+                            "nome":Nome
+                        }
+                    });
+                    if(!response.ok){
+                        const error = await response.text();
+                       alert(`Erro ao procurar evento: ${error}`);
+                    }else{
+                        const result = await response.json();
+                        EventosTabela.getElementsByTagName('tbody')[0].innerHTML = ''
+                        result.forEach(element =>{
+                            EventoShow(element)
+                        });
+                    }
+            }
+        }
+        async function Events() {
+            const Events = await fetch("http://localhost:3000/events/futuros",{
+                method:"GET"
+            });
+            if(Events.ok){
+                const evento = await Events.json();
+
+                EventosTabela.getElementsByTagName('tbody')[0].innerHTML = ''
+
+                evento.forEach(element => {
+                    EventoShow(element)
+                    });
+            }else{
+                alert(Events.text)
+            }
+        }
     </script>
 </body>
 </html>
