@@ -11,7 +11,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: rgb(1, 64, 1);
+            background: linear-gradient(135deg, #023f16, #013617);
             color: #ffffff;
             font-size: 16px;
             flex-direction: column;
@@ -162,58 +162,60 @@
         
     </style>
     <script>
+        // Função para criar evento
         async function criarEvento(event) {
-            event.preventDefault(); // Impede o envio padrão do formulário
-            
-            // Pegando os dados do formulário
+            event.preventDefault(); // Impede o comportamento padrão do formulário
+    
+            // Coletar valores do formulário
             const title = document.getElementById("title").value;
             const description = document.getElementById("description").value;
             const quotaValue = document.getElementById("quotaValue").value;
             const betStart = document.getElementById("betStart").value;
             const betEnd = document.getElementById("betEnd").value;
             const eventDate = document.getElementById("eventDate").value;
-
-            // Enviando dados para o back-end com fetch
+    
+            // Enviar para o backend
             try {
                 const response = await fetch("http://localhost:3000/newEvent", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        title,
-                        description,
-                        quotaValue,
-                        betStart,
-                        betEnd,
-                        eventDate
-                    }),
+                        
+                        "nameEvent": title,
+                        "descri": description,
+                        "data": eventDate,
+                        "valor": quotaValue,
+                        "HorarioI": betStart,
+                        "HorarioT": betEnd,
+                        "email": "adm" 
+                    }
                 });
-
-                const result = await response.json(); // Supondo que o back-end retorne um JSON
+    
+                const messageElement = document.getElementById("responseMessage");
                 if (response.ok) {
-                    // Se a resposta for ok, mostra uma mensagem de sucesso
-                    document.getElementById("responseMessage").style.color = "green";
-                    document.getElementById("responseMessage").textContent = result.message;
+                    messageElement.style.color = "green";
+                    messageElement.textContent = "Evento criado com sucesso!";
                 } else {
-                    // Caso contrário, mostra o erro
-                    document.getElementById("responseMessage").style.color = "red";
-                    document.getElementById("responseMessage").textContent = result.message;
+                    const errorText = await response.text();
+                    messageElement.style.color = "red";
+                    messageElement.textContent = errorText;
                 }
             } catch (error) {
-                console.error("Erro ao criar evento:", error);
-                document.getElementById("responseMessage").style.color = "red";
-                document.getElementById("responseMessage").textContent = "Erro ao tentar criar o evento!";
+                console.error("Erro:", error);
+                const messageElement = document.getElementById("responseMessage");
+                messageElement.style.color = "red";
+                messageElement.textContent = "Erro ao conectar ao backend.";
             }
         }
-
-        // Adicionando o evento de envio do formulário
+    
+        // Vincular a função ao formulário
         document.addEventListener("DOMContentLoaded", () => {
             const form = document.getElementById("createEventForm");
             form.addEventListener("submit", criarEvento);
         });
-
     </script>
+    
+    
+    
 </head>
 <body>
     <div id="area-cabeçalho">
@@ -255,69 +257,5 @@
         </form>
         <p id="responseMessage" style="color: red;"></p>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('createEventForm').addEventListener('submit', async function (event) {
-                event.preventDefault(); // Evita o comportamento padrão do formulário
-
-                const title = document.getElementById('title').value;
-                const description = document.getElementById('description').value;
-                const quotaValue = document.getElementById('quotaValue').value;
-                const betStart = document.getElementById('betStart').value;
-                const betEnd = document.getElementById('betEnd').value;
-                const eventDate = document.getElementById('eventDate').value;
-
-                const responseMessage = document.getElementById('responseMessage');
-                responseMessage.textContent = ''; // Limpa a mensagem anterior
-
-                console.log('Form data:', { title, description, quotaValue, betStart, betEnd, eventDate });
-
-                try {
-                    const token = localStorage.getItem('token'); // Obtém o token JWT do localStorage
-                    console.log('Token:', token);
-
-                    if (!token) {
-                        responseMessage.style.color = 'red';
-                        responseMessage.textContent = 'Erro: Usuário não autenticado.';
-                        console.log('Erro: Token não encontrado.');
-                        return;
-                    }
-
-                    const response = await fetch('http://localhost:3000/addNewEvent', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`, // Envia o token no cabeçalho
-                        },
-                        body: JSON.stringify({
-                            title,
-                            description,
-                            event_date: eventDate,
-                            quota_value: quotaValue,
-                            bet_start: betStart,
-                            bet_end: betEnd
-                        }),
-                    });
-
-                    console.log('Response status:', response.status);
-
-                    if (response.ok) {
-                        responseMessage.style.color = 'green';
-                        responseMessage.textContent = 'Evento criado com sucesso!';
-                        console.log('Evento criado com sucesso!');
-                    } else {
-                        const error = await response.text();
-                        responseMessage.style.color = 'red';
-                        responseMessage.textContent = `Erro: ${error}`;
-                        console.error('Erro no servidor:', error);
-                    }
-                } catch (error) {
-                    console.error('Erro ao criar evento:', error);
-                    responseMessage.style.color = 'red';
-                    responseMessage.textContent = 'Erro ao conectar com o servidor.';
-                }
-            });
-        });
-    </script>
 </body>
 </html>
