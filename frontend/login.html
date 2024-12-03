@@ -122,8 +122,7 @@
                     alert(`Erro no cadastro: ${error}`);
                 }else{
                     const result = await response.text();
-                    console.log(response.headers.authorization);
-                    const token = response.headers.get('authorization');
+                    const token = response.headers.get('Authorization');
                     console.log('Token recebido:', token);  // Verifique se o token está correto
                     if (token) {
                         localStorage.setItem('token', token); 
@@ -133,8 +132,8 @@
                     }
 
                     
-                    alert(result);
-                    //window.location.href = "wallet.html";
+                    
+                    window.location.href = "wallet.html";
                 }
             }
         }

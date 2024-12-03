@@ -261,7 +261,7 @@
             <h2>Adicionar Saldo</h2>
             <input type="number" id="qtdCredito" placeholder="Valor: (R$)" class="modal-input">
             <div class="modal-actions">
-                <button class="modal-button" onclick="ConfirmAdd()">Confirmar</button>
+                <button class="modal-button" onclick="confirmAdd()">Confirmar</button>
                 <button class="modal-button fechar" onclick="Cancel()">Cancelar</button>
             </div>
         </div>
@@ -272,7 +272,7 @@
             <input type="number" id="withdrawAmount" placeholder="Valor em R$" class="modal-input">
             <input type="text" id="bankDetails" placeholder="Conta bancária " class="modal-input">
             <div class="modal-actions">
-                <button class="modal-button" onclick="ConfirmWithdraw()">Confirmar</button>
+                <button class="modal-button" onclick="confirmWithdraw()">Confirmar</button>
                 <button class="modal-button close" onclick="Cancel()">Cancelar</button>
             </div>
         </div>
@@ -287,21 +287,21 @@
     </div>
 
     <script>
+        const token=localStorage.getItem('token')
         function verificar(){
             console.log(localStorage.getItem('token'));
             const token = localStorage.getItem('token');
             if (!token) {
                 alert("Usuário não autenticado. Redirecionando para o login...");
+                window.location.href = "wallet.html";
                 return;
-            }else{
-                alert("Token funfando");
             }
         }
         async function loadBalance() {
     try {
         const response = await fetch('http://localhost:3000/getWallet', {
             headers: {
-                'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbSIsImZ1bmNhbyI6Im4iLCJjYXJ0ZWlyYSI6MCwiaWF0IjoxNzMzMTc4NjYwLCJleHAiOjE3MzMxODU4NjB9.1HEvSQHJel2YQnsjEvsPHKqVq4xnhZkb7VjEdnKPvVo`
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -332,41 +332,46 @@
                 }
 
                 async function confirmAdd() {
+                    
                     const amount = document.getElementById('qtdCredito').value;
                     if (amount <= 0) {
                         alert("Valor inválido.");
                         return;
                     }
                     
-                    try {
-                        const response = await fetch('http://localhost:3000/addFunds', {
+                    
+                        
+                        const response = await fetch('http://localhost:3000/addFunds?valor=${amount}', {
                             method: 'PATCH',
                             headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                                'Content-Type': 'application/json'
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                                'valor':amount
+                                
                             },
-                            body: JSON.stringify({ amount })
+                            
+                            
                         });
 
-                        const data = await response.json();
-
-                        if (response.status === 201) {
-                            alert('Créditos adicionados com sucesso!');
-                            loadBalance();
-                        } else {
-                            alert(`Erro: ${data.message}`);
-                        }
-                    } catch (error) {
-                        console.error("Erro ao adicionar créditos:", error);
-                        alert("Erro ao adicionar créditos.");
+                        if (response.ok) {
+    
+                        const responseData = await response.text();  // Pode ser texto ou JSON, dependendo da sua resposta
+                    console.log('Fundos adicionados:', responseData);
+                    loadBalance(); // Atualiza o saldo
+                    Cancel();
+                    } else {
+    
+                    const errorData = await response.text();
+                    console.error('Erro ao adicionar fundos:', errorData);
+   
                     }
-                }
+        }
 
                 async function confirmWithdraw() {
                     const amount = parseFloat(document.getElementById('withdrawAmount').value); // Garantir que é um número
-                    const bankDetails = document.getElementById('bankDetails').value;
+                    
 
-                    if (amount <= 0 || !bankDetails) {
+                    if (amount <= 0) {
                         alert("Preencha os campos corretamente.");
                         return;
                     }
@@ -390,28 +395,28 @@
                     const totalAmount = amount - fee;  // O valor que será sacado após descontada a taxa
                     alert(`Taxa de saque: R$ ${fee.toFixed(2)}. O valor a ser sacado é R$ ${totalAmount.toFixed(2)}.`);
 
-                    try {
+                    
                         const response = await fetch('http://localhost:3000/withdrawFunds', {
                             method: 'PATCH',
                             headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                                'Content-Type': 'application/json'
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                                'valor': amount
                             },
-                            body: JSON.stringify({ amount, bankDetails, fee })  // Envia a taxa também para o servidor
+                            
                         });
+                        const data = await response.text();  // Lê a resposta como texto
 
-                        const data = await response.json();
-
-                        if (response.status === 200) {
-                            alert('Saque realizado com sucesso!');
-                            loadBalance(); // Atualiza o saldo após o saque
-                        } else {
-                            alert(`Erro: ${data.message}`);
-                        }
-                    } catch (error) {
-                        console.error("Erro ao realizar saque:", error);
-                        alert("Erro ao realizar saque.");
+                    if (response.status === 200) {
+                        Cancel();
+                        loadBalance(); // Atualiza o saldo após o saque
+                    } else {
+    
+                       alert(`Erro: ${data}`);
                     }
+
+
+                        
                 }
                 
 

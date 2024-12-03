@@ -15,9 +15,7 @@ const server = express();
 const routes = Router();
 
 
-server.use(cors())
-// definir as rotas. 
-// a rota tem um verbo/método http (GET, POST, PUT, DELETE)
+server.use(cors());
 routes.get('/', EventsShow.futuros);
 
 // vamos organizar as rotas em outro local 
@@ -34,7 +32,7 @@ routes.post('/signUp', AccountsHandler.createAccountRoute);//!
 
 routes.patch('/updateEvent', EventsHandler.AvaliarEvento)//!
 
-routes.get('/getWallet',AccountsHandler.getWallet);
+routes.get('/getWallet',WalletHandler.getWallet);
 
 routes.get('/Search',EventsShow.SearchEvent);
 
