@@ -262,18 +262,7 @@ export namespace WalletHandler {
             });
 
             
-            let deposito
-            if (parseFloat(pValor)<100){
-                deposito = (parseFloat(pValor)*4/100) + parseFloat(pValor);
-            }else if (parseFloat(pValor)<1000){
-                deposito = (parseFloat(pValor)*3/100) + parseFloat(pValor);
-            }else if (parseFloat(pValor)<5000){
-                deposito = (parseFloat(pValor)*2/100) + parseFloat(pValor);
-            }else if (parseFloat(pValor)<100000){
-                deposito = (parseFloat(pValor)*1/100) + parseFloat(pValor);
-            }else{
-                deposito = parseFloat(pValor);
-            }
+         
 
 
             //Ve se tem saldo suficiente na carteira
@@ -290,7 +279,7 @@ export namespace WalletHandler {
 
                 const dindin:string = row[0]
                 console.dir(dindin)
-                if (!dindin || parseFloat(dindin) < deposito) {
+                if (!dindin || parseFloat(dindin) < parseFloat(pValor)) {
                     res.status(403).send("Saldo insuficiente para saque.")
                     await conn.close()
                     return
@@ -302,14 +291,14 @@ export namespace WalletHandler {
 
             await conn.execute(
                 `UPDATE accounts SET carteira = carteira - :carteira WHERE email = :email`,
-                [deposito, pEmail] 
+                [parseFloat(pValor), pEmail] 
             );
 
             await conn.commit();
 
             await conn.close();
 
-            res.status(200).send(`Saque realizado com sucesso. Seu saque foi de ${deposito}`);
+            res.status(200).send(`Saque realizado com sucesso. Seu saque foi de ${parseFloat(pValor)}`);
             
             
         } catch (err) {
