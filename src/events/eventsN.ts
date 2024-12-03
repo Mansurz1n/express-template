@@ -2,6 +2,7 @@ import {Request, Response, RequestHandler, NextFunction} from "express";
 import OracleDB from "oracledb";
 import { AccountsHandler } from "../accounts/accounts";
 import { toDate } from "date-fns";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 
 
@@ -23,9 +24,17 @@ export namespace EventsHandler{
             const pValor = req.get('valor');
             const pHoraini = req.get('HorarioI');
             const pHorarioT = req.get('HorarioT');
-            const pEmail = req.get('email')
+            const token = req.headers.authorization?.split(' ')[1];
+            
+            if (!token) {
+                res.status(401).json({ error: 'Token não fornecido.' });
+                return;
+            }
+                // Decodificar o token JWT para obter o email do usuário
+                const decoded = jwt.verify(token, `${process.env.CHAVE}`) as JwtPayload;
+                const email = decoded.email;
 
-            if (!ptitulo || !pdesc || !pData || !pValor || !pHoraini || !pHorarioT || !pEmail) {
+            if (!ptitulo || !pdesc || !pData || !pValor || !pHoraini || !pHorarioT) {
                 res.status(400).send("Parâmetros inválidos");
                 return;
             }
@@ -58,7 +67,7 @@ export namespace EventsHandler{
                     newEvent.horarioIni,
                     newEvent.horarioTerm,
                     newEvent.valor,
-                    pEmail
+                    email
                 ]
             );
 

@@ -163,6 +163,17 @@
     </style>
     <script>
         // Função para criar evento
+        const token=localStorage.getItem('token')
+        function verificar(){
+            console.log(localStorage.getItem('token'));
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("Usuário não autenticado. Redirecionando para o login...");
+                window.location.href = "login.html";
+                return;
+            }
+        }
+
         async function criarEvento(event) {
             event.preventDefault(); // Impede o comportamento padrão do formulário
     
@@ -186,7 +197,7 @@
                         "valor": quotaValue,
                         "HorarioI": betStart,
                         "HorarioT": betEnd,
-                        "email": "adm" 
+                        'Authorization': `Bearer ${token}`
                     }
                 });
     
@@ -212,6 +223,7 @@
             const form = document.getElementById("createEventForm");
             form.addEventListener("submit", criarEvento);
         });
+        verificar();
     </script>
     
     
