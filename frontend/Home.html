@@ -43,10 +43,10 @@
             background: rgb(1, 64, 1);
             color: darkgreen;
             display: flex;
-            flex-direction: row;
-            text-align: center;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
         #box-evento {
             width: 85em;
@@ -54,7 +54,6 @@
             background: rgb(36, 35, 35);
             border-radius: 10px;
         }
-        
         a {
            text-decoration: none; 
         }
@@ -73,8 +72,8 @@
             margin-top: 20px; 
             z-index: 1;
         }
-        #searchInput {
-            width: 95%;
+        #SearchInput {
+            width: 75%;
         }
         #SearchBtn {
             background: green;
@@ -84,8 +83,29 @@
             text-align: left;
             font-size: 3em;
         }
+        .event-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end; /* Alinha os botões à direita */
+        }
+        .event-buttons button {
+            background-color: green;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .event-buttons button:hover {
+            background-color: darkgreen;
+        }
+        #box-evento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
     </style>
-
 </head>
 <body>
 
@@ -93,101 +113,123 @@
         <div id="area-logo">
             <h1>Bet<span class="green">Games</span></h1>
         </div>
-            <div id="area-menu">
-                <a href="Home.html">Home</a>
-                <a href="CriarEvento.html">Criar Evento</a>
-                <a href="wallet.html">Wallet</a>
-                <a href="login.html">Sair</a>
-            </div>
-
+        <div id="area-menu">
+            <a href="Home.html">Home</a>
+            <a href="CriarEvento.html">Criar Evento</a>
+            <a href="wallet.html">Wallet</a>
+            <a href="login.html">Sair</a>
         </div>
-    
-
     </div>
+
     <div class="search-container">
-        <input  id="Search" type="text" placeholder="Buscar eventos" id="searchInput">
+        <input id="Search" type="text" placeholder="Buscar eventos">
         <button id="SearchBtn" onclick="SearchEvents()">Buscar</button>
     </div>
+
     <div id="container-evento">
         <div id="box-evento">
-            <h2>Eventos disponíveis</h2>
-            <div class="row align-items-center" >
+            <div id="box-evento-header">
+                <h2>Eventos disponíveis</h2>
+                <div class="event-buttons">
+                    <button id="Nocheck" onclick="Nocheck()">Pendentes</button>
+                    <button id="Ocoridos" onclick="Ocoridos()">Ocorridos</button>
+                </div>
+            </div>
+            <div class="row align-items-center">
                 <div class="col">
-                  <table id="EventosTabela" class="table">
-                      <thead>
-                        <tr>
-                          <th scope="col" class="text-left ">ID</th>
-                          <th scope="col" class="text-left">Nome</th>
-                          <th scope="col" class="text-end">Valor aposta</th>
-                          <th scope="col" class="text-center">Data</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                            
-                      </tbody>
+                    <table id="EventosTabela" class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-left">ID</th>
+                                <th scope="col" class="text-left">Nome</th>
+                                <th scope="col" class="text-end">Valor aposta</th>
+                                <th scope="col" class="text-center">Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
         var EventosTabela = document.getElementById('EventosTabela');
 
         function EventoShow(element) {
-
             let e = parseFloat(element[6]);
-            
             const EventonaTabela = 
-                    `<tr id="${element.ID}">
-                        <td class="text-left">${element[0]}</th>
-                        <td class="text-left">${element[1]}</td>
-                        <td class="text-end">${e.toFixed(2)}</td>
-                        <td class="text-center"> ${element[3]}</td>
-                    </tr>`;
+                `<tr id="${element.ID}">
+                    <td class="text-left">${element[0]}</th>
+                    <td class="text-left">${element[1]}</td>
+                    <td class="text-end">${e.toFixed(2)}</td>
+                    <td class="text-center">${element[3]}</td>
+                </tr>`;
             EventosTabela.getElementsByTagName('tbody')[0].insertAdjacentHTML("beforeend", EventonaTabela)
-                
-            
         }
 
         async function SearchEvents() {
             var Nome = document.getElementById("Search").value;
             if(!Nome){
                 alert("Por favor digite algo.")
-            }else{
-                    const response = await fetch("http://localhost:3000/Search",{
-                        method:"GET",
-                        headers:{
-                            "nome":Nome
-                        }
+            } else {
+                const response = await fetch("http://localhost:3000/Search", {
+                    method:"GET",
+                    headers: { "nome": Nome }
+                });
+                if(!response.ok){
+                    const error = await response.text();
+                    alert(`Erro ao procurar evento: ${error}`);
+                } else {
+                    const result = await response.json();
+                    EventosTabela.getElementsByTagName('tbody')[0].innerHTML = '';
+                    result.forEach(element => {
+                        EventoShow(element);
                     });
-                    if(!response.ok){
-                        const error = await response.text();
-                       alert(`Erro ao procurar evento: ${error}`);
-                    }else{
-                        const result = await response.json();
-                        EventosTabela.getElementsByTagName('tbody')[0].innerHTML = ''
-                        result.forEach(element =>{
-                            EventoShow(element)
-                        });
-                    }
+                }
             }
         }
+
         async function Events() {
-            const Events = await fetch("http://localhost:3000/events/futuros",{
-                method:"GET"
-            });
-            if(Events.ok){
+            const Events = await fetch("http://localhost:3000/events/futuros", { method:"GET" });
+            if(Events.ok) {
                 const evento = await Events.json();
-
-                EventosTabela.getElementsByTagName('tbody')[0].innerHTML = ''
-
+                EventosTabela.getElementsByTagName('tbody')[0].innerHTML = '';
                 evento.forEach(element => {
-                    EventoShow(element)
-                    });
-            }else{
-                alert(Events.text)
+                    EventoShow(element);
+                });
+            } else {
+                alert(Events.text);
             }
         }
+
+        async function Nocheck() {
+            const Events = await fetch("http://localhost:3000/events/nochek", { method:"GET" });
+            if(Events.ok) {
+                const evento = await Events.json();
+                EventosTabela.getElementsByTagName('tbody')[0].innerHTML = '';
+                evento.forEach(element => {
+                    EventoShow(element);
+                });
+            } else {
+                alert(Events.text);
+            }
+        }
+
+        async function Ocoridos() {
+            const Events = await fetch("http://localhost:3000/events/ocoridos", { method:"GET" });
+            if(Events.ok) {
+                const evento = await Events.json();
+                EventosTabela.getElementsByTagName('tbody')[0].innerHTML = '';
+                evento.forEach(element => {
+                    EventoShow(element);
+                });
+            } else {
+                alert(Events.text);
+            }
+        }
+
         Events();
     </script>
 </body>
