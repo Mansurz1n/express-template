@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apostas</title>
     <style>
-         body {
+        body {
             display: flex;
-            flex-direction:column;
+            flex-direction: column;
             align-items: center;
             background: rgb(1, 64, 1);
             color: #ffffff;
@@ -29,6 +28,13 @@
         h1 {
             font-size: 3em;
         }
+        #saldoContainer {
+            font-size: 1.0rem; 
+            font-weight: normal; 
+            color: gray; 
+        }
+
+
         .green {
             color: green;
         }
@@ -43,28 +49,9 @@
             padding: 8px 20px;
         }
         a:hover {
-            color:white ;
-            background: darkgreen ;
+            color: white;
+            background: darkgreen;
         }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-        @keyframes slideInDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
         .main-content {
             margin-top: 100px;
             width: 90%;
@@ -76,7 +63,6 @@
             box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
             animation: scaleUp 0.5s ease-in-out;
         }
-
         @keyframes scaleUp {
             from {
                 transform: scale(0.9);
@@ -87,17 +73,6 @@
                 opacity: 1;
             }
         }
-
-        .event-details {
-            margin-bottom: 20px;
-        }
-
-        .event-details h2 {
-            font-size: 2rem;
-            color: green;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
         .bet-section {
             background: black; 
             padding: 30px;
@@ -107,7 +82,6 @@
             text-align: center;
             animation: fadeInUp 0.8s ease-in-out;
         }
-
         @keyframes fadeInUp {
             from {
                 transform: translateY(20px);
@@ -118,7 +92,6 @@
                 opacity: 1;
             }
         }
-
         .bet-section h3 {
             font-size: 1.8rem;
             margin-bottom: 20px;
@@ -126,33 +99,6 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
-        .bet-options {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .bet-options button {
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            border: 2px solid darkgreen;
-            border-radius: 8px;
-            background: transparent;
-            color: green;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .bet-options button.selected,
-        .bet-options button:hover {
-            background: green;
-            color: #ffffff;
-            transform: scale(1.1);
-            box-shadow: 0px 4px 10px rgba(16, 185, 129, 0.5);
-        }
-
         #betAmount {
             width: 100%;
             padding: 12px;
@@ -165,11 +111,9 @@
             outline: none;
             transition: border 0.3s ease;
         }
-
         #betAmount:focus {
             border-color: darkgreen;
         }
-
         .bet-section button {
             padding: 12px 25px;
             margin-top: 20px;
@@ -181,59 +125,24 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .bet-section button:hover {
             background: darkgreen;
             transform: scale(1.05);
             box-shadow: 0px 4px 10px rgba(16, 185, 129, 0.5);
         }
-
-        #balanceMessage {
+        #message {
             color: #f44336;
             margin-top: 15px;
             font-weight: bold;
-            animation: shake 0.5s ease;
         }
-
-        @keyframes shake {
-            0%, 100% {
-                transform: translateX(0);
-            }
-            25% {
-                transform: translateX(-5px);
-            }
-            75% {
-                transform: translateX(5px);
-            }
-        }
-
-        #addCreditsBtn {
-            background: green;
-            color: white;
-            margin-top: 20px;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        #addCreditsBtn:hover {
-            background: darkgreen;
-            transform: scale(1.05);
-        }
-
-        /* Responsividade */
         @media (max-width: 600px) {
             header h1 {
                 font-size: 2rem;
             }
-
             .bet-section {
                 width: 95%;
                 padding: 20px;
             }
-
             .bet-options button {
                 font-size: 0.9rem;
                 padding: 10px 15px;
@@ -242,71 +151,98 @@
     </style>
 </head>
 <body>
-
     <div id="area-cabeçalho">
         <div id="area-logo">
             <h1>Bet<span class="green">Games</span></h1>
         </div>
-            <div id="area-menu">
-                <a href="Home.html">Home</a>
-                <a href="CriarEvento.html">Criar Evento</a>
-                <a href="wallet.html">Wallet</a>
-                <a href="login.html">Sair</a>
-            </div>
-
+        <div id="area-menu">
+            <a href="Home.html">Home</a>
+            <a href="CriarEvento.html">Criar Evento</a>
+            <a href="wallet.html">Wallet</a>
+            <a href="login.html">Sair</a>
         </div>
-    
-
     </div>
 
     <main>
-        
-        <section id="event-details" class="event-section">
-            <!-- Os detalhes do evento serão carregados automaticamente -->
-        </section>
-
-        <!-- Campo de Aposta -->
+       
         <section class="bet-section">
-            <!-- Opções de Aposta -->
-            <h3>Escolha sua Aposta</h3>
-            <div class="bet-options">
-                <button onclick="betYes()" id="betYes">Sim</button>
-                <button onclick="betNo()" id="betNo">Não</button>
-            </div>
+            
+            <h3 id="saldoContainer">Saldo Atual: <span id="SaldoAtual">Carregando...</span></h3>
 
-            <!-- Valor da Aposta -->
+
+            
+            <h3>Valor da Aposta</h3>
             <input type="number" id="betAmount" placeholder="Valor da Aposta (R$)" min="1">
 
-            <!-- Botão de Confirmação -->
+            
             <button onclick="confirmBet()">Confirmar Aposta</button>
             <p id="message"></p>
         </section>
     </main>
-    
+
     <script>
         const token = localStorage.getItem('token');
-        const id = localStorage.getItem('eventid');
-        
-        function betYes(){
-            const res = 'sim'
-        }
-        function betNo(){
-            const res = 'nao'
-        }        
-                async function confirmBet() {
-            const loginRoute = "http://localhost:3000/betOnEvent"
-            var valor = document.getElementById("betAmount").value;
-            if (isValid(email,password)) {
-                console.info("Campos válidos")
-                //autenticar no back
-              const response = await fetch (loginRoute,{method:'GET',
-                headers:{
-                    "id": id,
-                    "res":res,
-                    "valor":valor,
-                    'Authorization': `Bearer ${token}`
+        const id = localStorage.getItem('eventId');
+
+       
+        async function loadBalance() {
+            try {
+                const response = await fetch('http://localhost:3000/getWallet', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('SaldoAtual').textContent = `R$ ${data.balance.toFixed(2)}`;
+                } else {
+                    alert(`Erro ao carregar saldo: ${data.error}`);
                 }
-              });
+            } catch (error) {
+                console.error("Erro ao carregar saldo:", error);
+                alert("Erro ao carregar saldo.");
+            }
+        }
+
+        
+        window.onload = loadBalance;
+
+        
+        async function confirmBet() {
+            console.log(id);
+            const betRoute = "http://localhost:3000/betOnEvent";
+            const betAmount = document.getElementById("betAmount").value;
+
+            if (betAmount <= 0) {
+                alert("Insira um valor válido para a aposta.");
+                return;
+            }
+
+            try {
+                const response = await fetch(betRoute, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                        'id': id,
+                        'valor': betAmount,
+                        'res':'sim'
+                    }
+                    
+                });
+
+                const data = await response.text();
+
+                if (response.ok) {
+                    document.getElementById('message').textContent = "Aposta confirmada com sucesso!";
+                    loadBalance(); 
+                } else {
+                    document.getElementById('message').textContent = `Erro: ${data.error}`;
+                }
+            } catch (error) {
+                console.error("Erro ao confirmar aposta:", error);
+                document.getElementById('message').textContent = "Erro ao confirmar aposta.";
             }
         }
     </script>
