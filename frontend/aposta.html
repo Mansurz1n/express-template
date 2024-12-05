@@ -270,8 +270,8 @@
             <!-- Opções de Aposta -->
             <h3>Escolha sua Aposta</h3>
             <div class="bet-options">
-                <button onclick="selectBetOption('yes')" id="betYes">Sim</button>
-                <button onclick="selectBetOption('no')" id="betNo">Não</button>
+                <button onclick="betYes()" id="betYes">Sim</button>
+                <button onclick="betNo()" id="betNo">Não</button>
             </div>
 
             <!-- Valor da Aposta -->
@@ -283,6 +283,32 @@
         </section>
     </main>
     
-
+    <script>
+        const token = localStorage.getItem('token');
+        const id = localStorage.getItem('eventid');
+        
+        function betYes(){
+            const res = 'sim'
+        }
+        function betNo(){
+            const res = 'nao'
+        }        
+                async function confirmBet() {
+            const loginRoute = "http://localhost:3000/betOnEvent"
+            var valor = document.getElementById("betAmount").value;
+            if (isValid(email,password)) {
+                console.info("Campos válidos")
+                //autenticar no back
+              const response = await fetch (loginRoute,{method:'GET',
+                headers:{
+                    "id": id,
+                    "res":res,
+                    "valor":valor,
+                    'Authorization': `Bearer ${token}`
+                }
+              });
+            }
+        }
+    </script>
 </body>
 </html>

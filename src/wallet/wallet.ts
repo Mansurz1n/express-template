@@ -103,12 +103,20 @@ export namespace WalletHandler {
 
 
     export const betOnEvent: RequestHandler = async (req: Request, res: Response) => {//testado e funfa só n testei umas coisas 
-        const pEmail = req.get('email');
+        const token = req.headers.authorization?.split(' ')[1];
         const pValor = req.get('valor');
         const pRes = req.get('res');
         const pId = req.get('id');
 
-        if (!pEmail || !pValor || !pRes || !pId ) {
+        if (!token) {
+            res.status(401).json({ error: 'Token não fornecido.' });
+            return;
+        }
+            // Decodificar o token JWT para obter o email do usuário
+            const decoded = jwt.verify(token, `${process.env.CHAVE}`) as JwtPayload;
+            const email = decoded.email;
+
+        if ( !pValor || !pRes || !pId ) {
             res.status(400).send("Parâmetros incompletos.");
             return;
         }
@@ -195,7 +203,7 @@ export namespace WalletHandler {
 
             const carteira = await conn.execute(
                 `SELECT carteira FROM accounts WHERE email = :email`,
-                [pEmail]
+                [email]
             )
             console.dir(carteira.rows)
             if(carteira.rows && carteira.rows.length>0){
@@ -212,12 +220,12 @@ export namespace WalletHandler {
 
             await conn.execute(
                 `UPDATE accounts SET carteira = carteira - :carteira WHERE email = :email`,
-                [parseFloat(pValor),pEmail]
+                [parseFloat(pValor),email]
             );
             
             await conn.execute(
                 `insert into apostas values (:Id_aposta,:valor,:email,:res)`,
-                [id, parseFloat(pValor),pEmail,pRes]
+                [id, parseFloat(pValor),email,pRes]
 
             )
             await conn.commit();

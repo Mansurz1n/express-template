@@ -161,12 +161,17 @@
             let e = parseFloat(element[6]);
             const EventonaTabela = 
                 `<tr id="${element.ID}">
-                    <td class="text-left">${element[0]}</th>
+                    <td class="text-left"><a href="#" onclick="saveEventId(${element[0]})">${element[0]}</a></td>
                     <td class="text-left">${element[1]}</td>
                     <td class="text-end">${e.toFixed(2)}</td>
                     <td class="text-center">${element[3]}</td>
                 </tr>`;
             EventosTabela.getElementsByTagName('tbody')[0].insertAdjacentHTML("beforeend", EventonaTabela)
+        }
+
+        function saveEventId(id) {
+            localStorage.setItem('eventId', id);
+            window.location.href = 'aposta.html'; 
         }
 
         async function SearchEvents() {
